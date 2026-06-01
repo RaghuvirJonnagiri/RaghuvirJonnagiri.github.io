@@ -75,9 +75,8 @@
     <p style="font-size:.9em;opacity:.85;margin-top:10px">A solo project &mdash; from idea to production,
        built with Claude Code on Google Cloud.</p>
     <div class="tags">
-      <span class="tag">AI / LLM</span>
-      <span class="tag">Google Cloud</span>
       <span class="tag">Built with Claude Code</span>
+      <span class="tag">Deployed on Google Cloud</span>
     </div>
     <div style="margin-top:24px">
       <a class="live-btn" href="https://learnlita.com" target="_blank">
@@ -110,7 +109,7 @@
     That overhead is where most attempts quietly stall.
   </p>
   <p>
-    Existing platforms hand you content, but not a path shaped around <strong>you</strong>. A data
+    Existing platforms hand you content, but not a path shaped around you. A data
     scientist picking up a new tool needs different framing than an engineer who already knows the basics;
     a career switcher needs more scaffolding than someone refreshing old knowledge. A fixed curriculum
     can't bend to any of them.
@@ -209,7 +208,7 @@
   <h2>Two stateless services on Google Cloud Run</h2>
   <p>
     The system is split into two independently deployed services. Both run on
-    <strong>Google Cloud Run</strong> &mdash; containerized, stateless, and horizontally scalable.
+    Google Cloud Run &mdash; containerized, stateless, and horizontally scalable.
     State lives in the database, not in the service. Any instance of the backend can serve any request.
   </p>
 
@@ -278,7 +277,7 @@
     without sacrificing interactivity.
   </p>
   <p>
-    A <strong>SQLite database</strong> mirrors the Cloud SQL schema for local development, so the entire
+    A SQLite database mirrors the Cloud SQL schema for local development, so the entire
     system can be run on a laptop without a cloud connection.
   </p>
 </section>
@@ -313,7 +312,7 @@
 
     <div class="decision">
       <h4>Adaptive feedback loop</h4>
-      <p>A wrong quiz answer triggers a <em>second</em> LLM call that analyzes the mistake, identifies
+      <p>A wrong quiz answer triggers a second LLM call that analyzes the mistake, identifies
          the specific weak concept, and injects a &ldquo;Let&rsquo;s Clarify&rdquo; section into the
          next lesson generation.</p>
       <div class="why">Why: Most quiz systems tell you the right answer. This one figures out
