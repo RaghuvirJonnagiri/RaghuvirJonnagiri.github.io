@@ -72,10 +72,12 @@
     <h1>Learnlita</h1>
     <p>An AI tutor that turns any learning goal into a structured, personalized course &mdash;
        lessons, quizzes, and adaptive feedback, all tailored to who you are.</p>
+    <p style="font-size:.92em;opacity:.82;margin-top:10px">A solo project, taken from idea to a live
+       production app with Claude Code and Google Cloud.</p>
     <div class="tags">
       <span class="tag">AI / LLM</span>
       <span class="tag">Google Cloud</span>
-      <span class="tag">Full-Stack</span>
+      <span class="tag">Built with Claude Code</span>
     </div>
     <div style="margin-top:24px">
       <a class="live-btn" href="https://learnlita.com" target="_blank">
@@ -100,26 +102,28 @@
 <!-- ============ PROBLEM ============ -->
 <section id="problem">
   <div class="kicker">Why It Exists</div>
-  <h2>The problem with learning something new</h2>
-  <p class="lead">
-    Wanting to learn something is easy. The friction is everything that comes before the first lesson:
-    figuring out what to study, in what order, at what level of detail for your specific background
-    &mdash; and then staying on track, testing yourself, and knowing whether you actually understood it.
+  <h2>The hard part isn't the learning</h2>
+  <p>
+    Most people don't lack the desire to learn something &mdash; they lack a path. Before the first
+    lesson, you have to work out what to study, in what order, and at what depth for your background.
+    Then you have to stay on track, test yourself honestly, and notice when something didn't land.
+    That overhead is where most attempts quietly stall.
   </p>
   <p>
-    Most learning platforms give you content. They don't give you <strong>a personalized path through it</strong>.
-    A data scientist learning Airflow needs different framing than a software engineer who already knows scheduling.
-    A career switcher needs different scaffolding than someone brushing up. Generic curricula paper over that gap.
+    Existing platforms hand you content, but not a path shaped around <strong>you</strong>. A data
+    scientist picking up a new tool needs different framing than an engineer who already knows the basics;
+    a career switcher needs more scaffolding than someone refreshing old knowledge. A fixed curriculum
+    can't bend to any of them.
   </p>
   <p>
-    Learnlita's position: describe what you want to learn in plain English &mdash; your goal, your background,
-    your pace &mdash; and the system handles everything else. It builds the plan, writes the lessons, tests
-    your understanding, identifies where you struggled, and adapts.
+    Learnlita removes that overhead. You describe what you want to learn in plain English &mdash; your
+    goal, your background, your pace &mdash; and the system does the rest: it builds the plan, writes each
+    lesson for your level, checks your understanding, finds where you struggled, and adapts.
   </p>
   <div class="callout">
-    The tagline &ldquo;<strong>Curiosity is all you need</strong>&rdquo; is the design brief.
-    Every architectural and product decision flows from removing friction between wanting to learn something
-    and actually learning it.
+    The product's guiding line &mdash; &ldquo;<strong>Curiosity is all you need</strong>&rdquo; &mdash;
+    is also its design brief. Every decision traces back to one goal: shrink the distance between
+    wanting to learn something and actually learning it.
   </div>
 </section>
 
@@ -128,8 +132,8 @@
   <div class="kicker">How It Works</div>
   <h2>From a goal to a structured course</h2>
   <p>
-    The user experience is a deliberate pipeline &mdash; each step feeds the next, and the system
-    personalizes at every stage, not just at sign-up.
+    The experience is a deliberate pipeline. Each step feeds the next, and the system re-personalizes
+    at every stage &mdash; not just at sign-up.
   </p>
 
   <div class="fig">
@@ -193,9 +197,9 @@
   </div>
 
   <p>
-    Personalization runs throughout &mdash; not just at setup. Every lesson is generated with the user's
-    profile (background, goals, skill level, learning style) injected into the AI's instructions.
-    The same topic is explained differently for a beginner vs. someone switching careers vs. a domain expert.
+    Crucially, personalization isn't a one-time setup step. Every lesson is generated with the learner's
+    profile &mdash; background, goals, skill level, preferred style &mdash; folded into the AI's
+    instructions, so the same topic reads differently for a beginner, a career switcher, or a domain expert.
   </p>
 </section>
 
@@ -281,11 +285,12 @@
 
 <!-- ============ DESIGN DECISIONS ============ -->
 <section id="decisions">
-  <div class="kicker">Engineering Decisions</div>
+  <div class="kicker">Key Decisions</div>
   <h2>The choices worth explaining</h2>
   <p>
-    Most of these decisions were made deliberately to handle a specific constraint &mdash; scale, cost,
-    flexibility, or content quality. Here's what and why:
+    Claude Code wrote most of the code, but the calls that shaped the product were mine: what to
+    optimize for, where to add guardrails, how to keep it cheap and easy to change. Here are the
+    decisions that mattered &mdash; and why:
   </p>
 
   <div class="decisions">
