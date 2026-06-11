@@ -58,9 +58,10 @@
   .live-btn:hover{opacity:.9}
   footer{text-align:center;color:var(--muted);padding:36px 20px;font-size:.92em}
   footer a{color:var(--brand)}
+  .decisions-3col{grid-template-columns:repeat(3,1fr)}
   @media(max-width:680px){
     table{display:block;overflow-x:auto}
-    .decisions{grid-template-columns:1fr}
+    .decisions,.decisions-3col{grid-template-columns:1fr}
     header h1{font-size:1.8em}
     section{padding:22px}
   }
@@ -92,6 +93,7 @@
   <a href="https://RaghuvirJonnagiri.github.io/" style="color:var(--brand);font-weight:800">&larr; Home</a>
   <a href="#problem">The Problem</a>
   <a href="#flow">How It Works</a>
+  <a href="#modes">Learning Modes</a>
   <a href="#arch">Architecture</a>
   <a href="#decisions">Design Decisions</a>
   <a href="#stack">Stack</a>
@@ -200,6 +202,64 @@
     Crucially, personalization isn't a one-time setup step. Every lesson is generated with the learner's
     profile &mdash; background, goals, skill level, preferred style &mdash; folded into the AI's
     instructions, so the same topic reads differently for a beginner, a career switcher, or a domain expert.
+  </p>
+</section>
+
+<!-- ============ LEARNING MODES ============ -->
+<section id="modes">
+  <div class="kicker">Learning Modes</div>
+  <h2>Three ways to experience every lesson</h2>
+  <p class="lead">
+    Once a lesson is generated, it can be experienced in three formats. All three are produced by the
+    AI and cached after first use, so the expensive generation only ever happens once per topic.
+  </p>
+
+  <div class="decisions decisions-3col">
+
+    <div class="decision" style="border-top:3px solid #3b5bdb">
+      <h4>Read</h4>
+      <p>A full written lesson with explanations, worked examples, analogies, and code snippets.
+         Rendered as rich text directly in the browser.</p>
+      <div class="why">The default mode. The learner's background, goals, and skill level are folded
+        into every generation prompt, so the same topic reads differently for a beginner versus an expert.</div>
+    </div>
+
+    <div class="decision" style="border-top:3px solid #7048e8">
+      <h4>Watch</h4>
+      <p>An animated storyboard. The AI breaks the lesson into up to 8 scenes &mdash; each with
+         spoken narration and one visual: code block, diagram, comparison table, concept map, or
+         example card. Visuals reveal in sync with the narration.</p>
+      <div class="why">One concept per scene; visuals timed to the words. Built to reduce cognitive
+        load compared to a wall of text. Narration is synthesized by Google Cloud TTS and played in
+        the browser.</div>
+    </div>
+
+    <div class="decision" style="border-top:3px solid #2f9e44">
+      <h4>Listen</h4>
+      <p>A two-host podcast conversation &mdash; similar to the NotebookLM audio overview. Two
+         hosts discuss the topic in a natural back-and-forth that's easy to absorb while commuting
+         or doing something else.</p>
+      <div class="why">Under the hood it's modeled as an audio-only storyboard, so it reuses the
+        same TTS pipeline, player, and audio cache as Watch mode &mdash; no duplicate
+        infrastructure.</div>
+    </div>
+
+  </div>
+
+  <h3>TTS pipeline and audio caching</h3>
+  <p>
+    Both Watch and Listen use the same narration system. Text is synthesized by
+    <strong>Google Cloud Chirp3-HD voices</strong> &mdash; the most natural-sounding voices in the
+    Google Cloud lineup, noticeably more expressive than the older Neural2 or Wavenet families.
+    Chirp3-HD doesn't expose exact SSML timing marks, so sentence start times are estimated at a
+    measured ~17&nbsp;chars/sec; the player uses these to highlight the current sentence as it
+    plays.
+  </p>
+  <p>
+    Synthesis is <strong>lazy</strong>: the first scene is synthesized immediately for a fast
+    first-play experience; the rest are synthesized on demand in the background. All audio is cached
+    in <strong>Google Cloud Storage</strong> using content-hash keys &mdash; if a lesson is
+    regenerated, the key changes and stale audio is never replayed.
   </p>
 </section>
 
@@ -380,6 +440,8 @@
       <tr><td><strong>Backend</strong></td><td>FastAPI (async Python), Pydantic, SQLAlchemy 2.0</td><td>Async throughout for LLM call concurrency</td></tr>
       <tr><td><strong>Database</strong></td><td>PostgreSQL on Google Cloud SQL</td><td>SQLite for local dev (same schema)</td></tr>
       <tr><td><strong>AI</strong></td><td>OpenAI-compatible SDK</td><td>Provider-agnostic; swap via env var</td></tr>
+      <tr><td><strong>Audio / TTS</strong></td><td>Google Cloud Text-to-Speech (Chirp3-HD)</td><td>Watch &amp; Listen modes; lazy synthesis, sentence-level sync</td></tr>
+      <tr><td><strong>Storage</strong></td><td>Google Cloud Storage</td><td>Audio cache with content-hash keys; stale audio never replayed</td></tr>
       <tr><td><strong>Auth</strong></td><td>Google OAuth 2.0 + JWT (HS256)</td><td>Stateless; no session store</td></tr>
       <tr><td><strong>Infrastructure</strong></td><td>Google Cloud Run, Cloud SQL, Container Registry</td><td>Docker, horizontal scaling, no idle cost</td></tr>
       <tr><td><strong>Testing</strong></td><td>Playwright (E2E), pytest</td><td>Live-site tests + local unit tests</td></tr>
