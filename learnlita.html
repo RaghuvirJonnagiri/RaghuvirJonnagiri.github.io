@@ -218,10 +218,12 @@
 <!-- ============ LEARNING MODES ============ -->
 <section id="modes">
   <div class="kicker">Learning Modes</div>
-  <h2>Three ways to experience every lesson</h2>
+  <h2>Three modes, with in-lesson Q&amp;A</h2>
   <p class="lead">
     Once a lesson is generated, it can be experienced in three formats. All three are produced by the
     AI and cached after first use, so the expensive generation only ever happens once per topic.
+    Watch and Listen also support a native "Ask" feature — learners can pause and ask a question
+    mid-lesson and get a voiced, in-mode answer without leaving the player.
   </p>
 
   <div class="decisions decisions-3col">
@@ -255,6 +257,25 @@
     </div>
 
   </div>
+
+  <h3>Asking a question mid-lesson</h3>
+  <p>
+    Both Watch and Listen modes include a native <strong>"Ask" feature</strong>: a learner can pause the lesson at any
+    point and ask a question. Tapping Ask opens a voice-first input (speech recognition auto-submits on silence;
+    a keyboard fallback appears if the mic is unavailable). The system then generates a native answer matched to the
+    current mode:
+  </p>
+  <ul style="margin:10px 0 14px 22px;font-size:.97em">
+    <li>In <strong>Watch</strong>: 2–3 animated storyboard scenes that directly answer the question, voiced by the
+        same narrator.</li>
+    <li>In <strong>Listen</strong>: Alex and Sam answer the question in character, in their own back-and-forth style.</li>
+  </ul>
+  <p>
+    After the answer plays, the learner can continue the original lesson or ask a follow-up. The answer player is
+    a separate component mounted on top of the main player, so the original lesson audio never has to restart.
+    The key architectural move: no new infrastructure was required — the Ask feature reuses the same storyboard/
+    podcast generator and TTS pipeline as the original lesson.
+  </p>
 
   <h3>TTS pipeline and audio caching</h3>
   <p>
@@ -425,6 +446,15 @@
         routinely tells learners to &ldquo;open a terminal&rdquo; or &ldquo;execute this script&rdquo;
         on a platform where they can only read. The enforcement layer is invisible to the user but
         essential for coherence.</div>
+    </div>
+
+    <div class="decision">
+      <h4>In-lesson Q&amp;A reuses the lesson pipeline</h4>
+      <p>The Watch and Listen "Ask" feature generates a native answer — animated scenes or a host dialogue —
+         using the exact same storyboard/podcast generator and TTS pipeline as the original lesson content.</p>
+      <div class="why">Why: building a separate Q&amp;A response format would have meant a third content type,
+        a third player, and a third audio path. Reusing the existing pipeline meant the feature shipped with a
+        single new API route and one new frontend component — zero new infrastructure.</div>
     </div>
 
     <div class="decision">
