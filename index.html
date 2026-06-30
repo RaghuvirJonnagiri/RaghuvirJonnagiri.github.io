@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Raghuvir Jonnagiri &middot; Optimization Write-ups</title>
-<meta name="description" content="Raghuvir Jonnagiri — selected optimization and machine-learning projects, with illustrated walkthroughs.">
+<title>Raghuvir Jonnagiri &middot; Data Science &amp; Machine Learning</title>
+<meta name="description" content="Raghuvir Jonnagiri — selected machine learning, GenAI, and optimization projects, with illustrated walkthroughs.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://raghuvirjonnagiri.github.io/">
-<meta property="og:title" content="Raghuvir Jonnagiri — Optimization & ML Write-ups">
-<meta property="og:description" content="Selected projects with illustrated walkthroughs: vehicle routing with OR-Tools, large-scale offer optimization, an AI tutoring app, and more.">
+<meta property="og:title" content="Raghuvir Jonnagiri — Data Science & Machine Learning">
+<meta property="og:description" content="Selected projects with illustrated walkthroughs: a production GenAI app on Google Cloud, large-scale credit-card ML, vehicle routing, and more.">
 <meta property="og:image" content="https://raghuvirjonnagiri.github.io/og-home.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Raghuvir Jonnagiri — Optimization & ML Write-ups">
+<meta name="twitter:title" content="Raghuvir Jonnagiri — Data Science & Machine Learning">
 <meta name="twitter:description" content="Selected projects with illustrated walkthroughs.">
 <meta name="twitter:image" content="https://raghuvirjonnagiri.github.io/og-home.png">
 <style>
@@ -56,7 +56,7 @@
 <header>
   <div class="wrap">
     <h1>Raghuvir Jonnagiri</h1>
-    <p>Select projects, with illustrated walkthroughs.</p>
+    <p>Senior Data Scientist &mdash; predictive modeling, feature engineering &amp; LLM applications, with hands-on experience taking models to production on GCP.</p>
     <div class="links">
       <a href="mailto:raghuvir.jonnagiri@gmail.com">raghuvir.jonnagiri@gmail.com</a>
     </div>
@@ -67,17 +67,8 @@
   <div class="wrap">
     <div class="sec-label">Write-ups</div>
 
-    <a class="post" href="https://RaghuvirJonnagiri.github.io/vehicle-routing-optimization/">
-      <span class="tag">Vehicle routing &middot; OR-Tools</span>
-      <h2>Sizing &amp; Routing a Big-and-Bulky Delivery Fleet</h2>
-      <p>How many trucks, run from how many depots, on which routes &mdash; for a heavy-goods
-         home-delivery network with appointment windows. An optimization study on a real road
-         network, with interactive route maps and live charts.</p>
-      <span class="read">Read &rarr;</span>
-    </a>
-
     <a class="post" href="./learnlita.html">
-      <span class="tag">Built with Claude Code &middot; Deployed on Google Cloud</span>
+      <span class="tag">LLM application &middot; deployed on Google Cloud</span>
       <h2>Learnlita &mdash; AI-Powered Personalized Learning</h2>
       <p>An AI tutor that turns any learning goal into a personalized course. How I took a real product
          from idea to a live app on Google Cloud &mdash; built with Claude Code &mdash; and the key
@@ -86,11 +77,22 @@
     </a>
 
     <a class="post" href="https://RaghuvirJonnagiri.github.io/CreditCards_OfferOptimization/">
-      <span class="tag">Linear optimization &middot; at scale</span>
+      <span class="tag">Predictive modeling &middot; production at scale</span>
       <h2>Which Customer Gets Which Offer?</h2>
-      <p>Choosing the best credit-card offer for tens of millions of people at once: a large-scale
-         linear program, the role of shadow prices, and how the answer is found when there are a billion
-         decisions to make.</p>
+      <p>The credit-card offer models behind tens of millions of decisions at Citi: turning messy data
+         into features (including CNN-derived signals), training XGBoost models to score each
+         customer&ndash;offer pair on response, revenue, and risk, and partnering with risk,
+         fair-lending, legal, and marketing teams to take models from conception to production and
+         monitoring. Those scores feed a large-scale offer-assignment optimizer.</p>
+      <span class="read">Read &rarr;</span>
+    </a>
+
+    <a class="post" href="https://RaghuvirJonnagiri.github.io/vehicle-routing-optimization/">
+      <span class="tag">Vehicle routing &middot; OR-Tools</span>
+      <h2>Sizing &amp; Routing a Big-and-Bulky Delivery Fleet</h2>
+      <p>How many trucks, run from how many depots, on which routes &mdash; for a heavy-goods
+         home-delivery network with appointment windows. An optimization study on a real road
+         network, with interactive route maps and live charts.</p>
       <span class="read">Read &rarr;</span>
     </a>
 
