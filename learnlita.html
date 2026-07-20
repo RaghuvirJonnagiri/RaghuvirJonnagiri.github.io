@@ -104,6 +104,7 @@
   <a href="#problem">The Problem</a>
   <a href="#flow">How It Works</a>
   <a href="#modes">Learning Modes</a>
+  <a href="#rag">Your Own Material</a>
   <a href="#arch">Architecture</a>
   <a href="#decisions">Design Decisions</a>
   <a href="#stack">Stack</a>
@@ -294,6 +295,79 @@
   </p>
 </section>
 
+<!-- ============ RAG / OWN MATERIAL ============ -->
+<section id="rag">
+  <div class="kicker">Retrieval-Augmented Generation</div>
+  <h2>Learning from your own material, not just the model's memory</h2>
+  <p>
+    A general-purpose model's knowledge is generic. If a learner uploads their actual course
+    textbook, or a niche PDF the model has never seen, lessons should teach <em>from that
+    document</em> &mdash; not a generic version of the topic. The catch: a real textbook is far
+    bigger than anything that fits into a single AI request, so the system can't just paste the
+    whole book into the prompt.
+  </p>
+  <p>
+    Learnlita solves this with retrieval-augmented generation. An uploaded document is split into
+    passages, and each passage is converted into a vector embedding &mdash; a numeric fingerprint
+    of its meaning &mdash; and stored in a searchable index. When a lesson is generated, the
+    system searches that index for the handful of passages most relevant to the current topic and
+    hands only those to the AI. A 400-page book can ground a single lesson without ever needing to
+    fit the whole book into one prompt.
+  </p>
+
+  <div class="fig">
+    <svg viewBox="0 0 700 140" role="img" aria-label="RAG pipeline: upload a PDF, chunk and embed it on a background worker, store vectors, retrieve relevant passages, and write a grounded lesson">
+      <defs>
+        <marker id="rg" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#3b5bdb"/></marker>
+      </defs>
+      <rect x="10" y="40" width="122" height="60" rx="9" fill="#eef2ff" stroke="#c3d0f7" stroke-width="1.4"/>
+      <text x="71" y="64" text-anchor="middle" font-size="11" font-weight="700" fill="#3b5bdb">Upload a PDF</text>
+      <text x="71" y="80" text-anchor="middle" font-size="9.5" fill="#5b6675">or book</text>
+
+      <rect x="148" y="40" width="122" height="60" rx="9" fill="#f3effe" stroke="#d0c3f7" stroke-width="1.4"/>
+      <text x="209" y="60" text-anchor="middle" font-size="10.5" font-weight="700" fill="#7048e8">Chunk &amp; embed</text>
+      <text x="209" y="76" text-anchor="middle" font-size="9" fill="#5b6675">background GPU</text>
+      <text x="209" y="90" text-anchor="middle" font-size="9" fill="#5b6675">worker service</text>
+
+      <rect x="286" y="40" width="122" height="60" rx="9" fill="#fff6ec" stroke="#ffd8a8" stroke-width="1.4"/>
+      <text x="347" y="64" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e8590c">Vector store</text>
+      <text x="347" y="80" text-anchor="middle" font-size="9" fill="#5b6675">pgvector on Cloud SQL</text>
+
+      <rect x="424" y="40" width="122" height="60" rx="9" fill="#eef2ff" stroke="#c3d0f7" stroke-width="1.4"/>
+      <text x="485" y="64" text-anchor="middle" font-size="11" font-weight="700" fill="#3b5bdb">Retrieve</text>
+      <text x="485" y="80" text-anchor="middle" font-size="9" fill="#5b6675">top relevant passages</text>
+
+      <rect x="562" y="40" width="122" height="60" rx="9" fill="#ebfbee" stroke="#b2f2bb" stroke-width="1.4"/>
+      <text x="623" y="60" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2f9e44">Grounded lesson</text>
+      <text x="623" y="76" text-anchor="middle" font-size="9" fill="#5b6675">AI writes it, citing</text>
+      <text x="623" y="90" text-anchor="middle" font-size="9" fill="#5b6675">the source material</text>
+
+      <line x1="132" y1="70" x2="146" y2="70" stroke="#3b5bdb" stroke-width="1.8" marker-end="url(#rg)"/>
+      <line x1="270" y1="70" x2="284" y2="70" stroke="#3b5bdb" stroke-width="1.8" marker-end="url(#rg)"/>
+      <line x1="408" y1="70" x2="422" y2="70" stroke="#3b5bdb" stroke-width="1.8" marker-end="url(#rg)"/>
+      <line x1="546" y1="70" x2="560" y2="70" stroke="#3b5bdb" stroke-width="1.8" marker-end="url(#rg)"/>
+    </svg>
+    <div class="cap">Ingestion (upload &rarr; chunk &rarr; embed &rarr; store) happens once per document.
+      Retrieval (search &rarr; write) happens fresh for every lesson, pulling only the passages that
+      topic actually needs.</div>
+  </div>
+
+  <p>
+    The embedding step is compute-heavy, so it doesn't run on the main app server. It's handled by
+    a separate, purpose-built background service with GPU access that scales independently and
+    down to zero when idle &mdash; a large upload processes in the background while the rest of the
+    app stays fast for everyone else. The two services talk through an async task queue rather than
+    a direct call, so a slow ingestion job never blocks a live request.
+  </p>
+  <p>
+    Scanned or image-heavy pages lose their equations and diagrams to plain text extraction &mdash;
+    a formula becomes a scramble of stray characters, and a figure disappears entirely. For those
+    pages, the system also reads the page as an image through a vision-capable model to recover
+    proper equation notation and extract the real figures, so a lesson can reference the book's
+    actual diagram instead of a text description of one.
+  </p>
+</section>
+
 <!-- ============ ARCHITECTURE ============ -->
 <section id="arch">
   <div class="kicker">Architecture</div>
@@ -371,6 +445,12 @@
   <p>
     A SQLite database mirrors the Cloud SQL schema for local development, so the entire
     system can be run on a laptop without a cloud connection.
+  </p>
+  <p>
+    A third service sits behind the scenes: the GPU-backed worker described above, which handles
+    document ingestion and embedding. Splitting it out keeps that occasional heavy workload
+    completely isolated from the request path everyone else uses &mdash; the two services scale,
+    fail, and cost independently of each other.
   </p>
 </section>
 
@@ -466,6 +546,37 @@
         PostgreSQL JSON gives the flexibility of a document store within a relational system.</div>
     </div>
 
+    <div class="decision">
+      <h4>A dedicated service for heavy background work</h4>
+      <p>Chunking and embedding a large document is a fundamentally different workload than serving
+         chat responses &mdash; longer-running and GPU-bound. It runs as its own Cloud Run service,
+         connected to the main app by an async task queue.</p>
+      <div class="why">Why: mixing the two workloads on one service means a big upload could slow
+        down every other user's request. Splitting them lets each scale, and cost, independently
+        &mdash; the GPU service scales to zero when nothing is processing.</div>
+    </div>
+
+    <div class="decision">
+      <h4>Vector search without a new vendor</h4>
+      <p>Document embeddings are stored using pgvector, a PostgreSQL extension, inside the same
+         Cloud SQL instance the rest of the app already uses &mdash; not a separate vector database
+         product.</p>
+      <div class="why">Why: a dedicated vector database is one more system to run, monitor, and pay
+        for. pgvector gets fast similarity search essentially for free on infrastructure that
+        already exists.</div>
+    </div>
+
+    <div class="decision">
+      <h4>Cost visibility with an automated safety net</h4>
+      <p>Every AI call's actual dollar cost is tracked and rolled up into a live dashboard. A
+         budget-threshold circuit breaker watches total spend and, if it ever crosses a preset
+         monthly limit, automatically pauses the app and notifies me &mdash; restartable with a
+         single command once I've reviewed what happened.</p>
+      <div class="why">Why: a product that calls a metered AI API on every user action needs a hard
+        backstop, not just a dashboard someone might forget to check. The breaker protects against
+        a runaway cost scenario without requiring anyone to be watching in real time.</div>
+    </div>
+
   </div>
 </section>
 
@@ -480,10 +591,14 @@
       <tr><td><strong>Backend</strong></td><td>FastAPI (async Python), Pydantic, SQLAlchemy 2.0</td><td>Async throughout for LLM call concurrency</td></tr>
       <tr><td><strong>Database</strong></td><td>PostgreSQL on Google Cloud SQL</td><td>SQLite for local dev (same schema)</td></tr>
       <tr><td><strong>AI</strong></td><td>OpenAI-compatible SDK</td><td>Provider-agnostic; swap via env var</td></tr>
+      <tr><td><strong>Retrieval / Vector search</strong></td><td>pgvector (PostgreSQL extension)</td><td>Embeddings for uploaded documents; no separate vector DB</td></tr>
+      <tr><td><strong>Background processing</strong></td><td>Dedicated Cloud Run worker (GPU), async task queue</td><td>Document chunking &amp; embedding, isolated from the request path</td></tr>
+      <tr><td><strong>Multimodal extraction</strong></td><td>Vision-capable AI model</td><td>Recovers equations &amp; figures from scanned/image-heavy pages</td></tr>
       <tr><td><strong>Audio / TTS</strong></td><td>Google Cloud Text-to-Speech (Chirp3-HD)</td><td>Watch &amp; Listen modes; lazy synthesis, sentence-level sync</td></tr>
-      <tr><td><strong>Storage</strong></td><td>Google Cloud Storage</td><td>Audio cache with content-hash keys; stale audio never replayed</td></tr>
+      <tr><td><strong>Storage</strong></td><td>Google Cloud Storage</td><td>Audio &amp; document cache with content-hash keys</td></tr>
       <tr><td><strong>Auth</strong></td><td>Google OAuth 2.0 + JWT (HS256)</td><td>Stateless; no session store</td></tr>
-      <tr><td><strong>Infrastructure</strong></td><td>Google Cloud Run, Cloud SQL, Container Registry</td><td>Docker, horizontal scaling, no idle cost</td></tr>
+      <tr><td><strong>Infrastructure</strong></td><td>Google Cloud Run (&times;3), Cloud SQL, Container Registry</td><td>Docker, horizontal scaling, no idle cost</td></tr>
+      <tr><td><strong>Monitoring &amp; ops</strong></td><td>Uptime checks, budget alerts, automated cost circuit breaker</td><td>Production-grade guardrails on a solo-run app</td></tr>
       <tr><td><strong>Testing</strong></td><td>Playwright (E2E), pytest</td><td>Live-site tests + local unit tests</td></tr>
     </tbody>
   </table>
