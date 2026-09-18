@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Explaining a Prediction Market &middot; Rotten Tomatoes Forecasting</title>
+<meta name="description" content="A live forecast of where a movie's Rotten Tomatoes score will settle: pedigree before any review exists, then revised by every review that lands. Benchmarked against a prediction market it never sees in training, running unattended on Google Cloud.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://raghuvirjonnagiri.github.io/rt-predictions.html">
+<meta property="og:title" content="Can a Transparent Model Explain a Prediction Market?">
+<meta property="og:description" content="Forecasting where a movie's Rotten Tomatoes score settles, updated minute by minute as reviews arrive, with a live prediction market used only as a yardstick. ~1,000 films, ~193,000 timestamped reviews, deployed on Google Cloud.">
+<meta property="og:image" content="https://raghuvirjonnagiri.github.io/og-home.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Can a Transparent Model Explain a Prediction Market?">
+<meta name="twitter:description" content="A live forecast that starts from pedigree and updates with every incoming review, benchmarked against a prediction market. Deployed on Google Cloud.">
+<meta name="twitter:image" content="https://raghuvirjonnagiri.github.io/og-home.png">
+<style>
+  :root{
+    --ink:#1f2733; --muted:#5b6675; --line:#e3e8ef;
+    --brand:#3b5bdb; --brand2:#7048e8; --accent:#e8590c;
+    --good:#2f9e44; --bg:#f5f7fb; --card:#ffffff;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.65;font-size:17px}
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px}
+  header{background:linear-gradient(135deg,#283a96 0%,#4a2aa6 100%);color:#fff;
+    padding:64px 20px 56px;text-align:center}
+  header h1{font-size:2.4em;line-height:1.15;margin-bottom:14px;letter-spacing:-.5px}
+  header p{font-size:1.12em;opacity:.92;max-width:660px;margin:0 auto;color:#fff}
+  .tags{margin-top:22px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .tag{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);
+    padding:5px 13px;border-radius:999px;font-size:.82em;font-weight:600}
+  nav{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.97);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;gap:6px;overflow-x:auto;padding:10px 20px}
+  nav a{color:var(--muted);text-decoration:none;font-size:.86em;font-weight:600;
+    white-space:nowrap;padding:6px 12px;border-radius:6px}
+  nav a:hover{background:var(--bg);color:var(--brand)}
+  section{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:34px;margin:26px 0;box-shadow:0 1px 3px rgba(20,30,60,.04)}
+  h2{font-size:1.5em;color:var(--ink);margin-bottom:8px;letter-spacing:-.3px}
+  .kicker{text-transform:uppercase;letter-spacing:1.5px;font-size:.72em;
+    font-weight:700;color:var(--brand);margin-bottom:14px}
+  h3{font-size:1.12em;color:var(--brand2);margin:26px 0 8px}
+  p{margin-bottom:14px;color:#2a3340}
+  .lead{font-size:1.08em}
+  strong{color:var(--ink)}
+  .fig{background:#fbfcfe;border:1px solid var(--line);border-radius:12px;
+    padding:18px;margin:22px 0;text-align:center}
+  .fig svg{max-width:100%;height:auto}
+  .cap{font-size:.86em;color:var(--muted);margin-top:10px;font-style:italic;text-align:left}
+  .callout{border-left:4px solid var(--brand);background:#f3f6ff;padding:16px 18px;
+    border-radius:0 8px 8px 0;margin:18px 0}
+  .callout.warn{border-left-color:var(--accent);background:#fff6ec}
+  .hl{background:#fff3bf;padding:1px 5px;border-radius:3px}
+  .decisions{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:22px 0}
+  .decision{border:1px solid var(--line);border-radius:10px;padding:18px;background:#fbfcfe}
+  .decision h4{font-size:.95em;font-weight:700;color:var(--ink);margin-bottom:6px}
+  .decision .why{font-size:.85em;color:var(--muted);margin-top:8px;padding-top:8px;
+    border-top:1px solid var(--line)}
+  .decision p:last-of-type{margin-bottom:0}
+  .kept{border-color:#b2f2bb;background:#f7fdf8}
+  .killed{border-color:#ffd8a8;background:#fffaf4}
+  .kept h4{color:var(--good)}
+  .killed h4{color:var(--accent)}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:.95em}
+  th,td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--line)}
+  th{background:#fbfcfe;font-size:.8em;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}
+  .stat{border:1px solid var(--line);border-radius:10px;padding:16px;background:#fbfcfe;text-align:center}
+  .stat .n{font-size:1.45em;font-weight:800;color:var(--brand);letter-spacing:-.5px;line-height:1.2}
+  .stat .l{font-size:.78em;color:var(--muted);margin-top:4px}
+  code{background:#f1f3f9;padding:1px 5px;border-radius:4px;font-size:.88em}
+  footer{text-align:center;color:var(--muted);padding:36px 20px;font-size:.92em}
+  footer a{color:var(--brand)}
+  @media(max-width:680px){
+    /* Squeezing a figure or a table to phone width makes it illegible; let each keep a
+       readable minimum and scroll inside its own box instead. */
+    /* Stack each table row as its own card. Scrolling a 3-column table sideways on a phone
+       leaves the off-screen column setting the row height, which looks broken. */
+    table{display:block}
+    thead{display:none}
+    tbody,tr,td{display:block;width:auto}
+    tr{border:1px solid var(--line);border-radius:10px;padding:14px 16px;
+       margin-bottom:12px;background:#fbfcfe}
+    td{border:0;padding:2px 0}
+    td:first-child{font-size:1.02em;margin-bottom:2px}
+    td:nth-child(2){color:var(--brand);font-weight:700;font-size:.9em;margin-bottom:6px}
+    .fig{overflow-x:auto;-webkit-overflow-scrolling:touch;text-align:left}
+    .fig svg{min-width:540px;max-width:none}
+    .cap{min-width:0}
+    .decisions{grid-template-columns:1fr}
+    .stats{grid-template-columns:1fr 1fr}
+    header h1{font-size:1.75em}
+    section{padding:22px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>Can a Transparent Model Explain a Prediction Market?</h1>
+    <p>A prediction market prices where a movie&rsquo;s Rotten&nbsp;Tomatoes score will settle on Monday.
+       I forecast the same number at every minute of the week, from pedigree alone before any review
+       exists to a posterior revised by each review that lands, and never let the model see the market.</p>
+    <p style="font-size:1.02em;margin-top:14px;background:rgba(255,255,255,.14);
+       border:1px solid rgba(255,255,255,.26);border-radius:10px;padding:12px 16px;max-width:660px;
+       margin-left:auto;margin-right:auto">
+       <strong style="color:#fff">The short answer is no, and that is the finding.</strong> Before the
+       embargo lifts, the market holds private information my public features cannot represent, and it
+       beats me decisively. Afterwards we converge, but so does simply averaging the reviews already
+       posted, which turns out to be most of what the convergence is. Both are measured below.</p>
+    <p style="font-size:.9em;opacity:.85;margin-top:14px">A solo project: I collected the data, built the
+       models, and keep the pipeline running unattended on Google&nbsp;Cloud.</p>
+    <div class="tags">
+      <span class="tag">Sequential forecasting</span>
+      <span class="tag">Self-collected data</span>
+      <span class="tag">Deployed on Google Cloud</span>
+    </div>
+  </div>
+</header>
+
+<nav><div class="wrap">
+  <a href="https://RaghuvirJonnagiri.github.io/" style="color:var(--brand);font-weight:800">&larr; Home</a>
+  <a href="#why">The Question</a>
+  <a href="#drift">What Moves</a>
+  <a href="#data">Data</a>
+  <a href="#model">Model</a>
+  <a href="#findings">Findings</a>
+  <a href="#production">Production</a>
+  <a href="#decisions">Decisions</a>
+  <a href="#stack">Stack</a>
+</div></nav>
+
+<div class="wrap">
+
+<!-- ============ WHY ============ -->
+<section id="why">
+  <div class="kicker">The Question</div>
+  <h2>A price exists for a number nobody has computed yet</h2>
+  <p class="lead">
+    A movie&rsquo;s Tomatometer is the share of critics whose review is counted as positive. It first
+    appears when the review embargo lifts, a few days before release, and it keeps moving as more critics
+    file. There is a market where people trade contracts on where that percentage will sit at a fixed
+    Monday cutoff, and that market carries a live price all week.
+  </p>
+  <p>
+    So a number is being priced before it is knowable. The price comes from somewhere I cannot see:
+    industry tracking, test screenings, private conversations, gut feel. The question I wanted to answer
+    is whether <strong>public information alone</strong> can land where that opaque price lands.
+  </p>
+  <p>
+    That question has two halves, and they are very different problems. Before the embargo lifts there is
+    no review to read, so the only evidence is pedigree: who directed it, who wrote it, which studio
+    released it, what it cost, how long it is. After the embargo lifts, reviews start landing one at a
+    time, each timestamped, and the forecast has to <strong>absorb them as they arrive</strong> and keep
+    projecting forward to the Monday deadline, when critics who have not yet filed will have filed. The
+    first half is a cold-start prediction. The second is a sequential one, and it is the larger part of
+    the work: the number you are predicting keeps moving while you predict it.
+  </p>
+  <div class="callout">
+    <p style="margin-bottom:0"><strong>The thesis.</strong> If a transparent model built only from public
+      information arrives at the market&rsquo;s number, that convergence <em>explains</em> the price:
+      it says the market is reading things anyone could read, not secrets. Where the two disagree, the
+      disagreement itself is the finding. The goal was never a trading edge.</p>
+  </div>
+  <p>
+    That framing dictated one hard rule, enforced everywhere in the code: <span class="hl">the market
+    price is never a feature and never a label.</span> It appears only at evaluation time, as a yardstick
+    I am scored against. A model that can see the price would learn to copy it and explain nothing.
+  </p>
+
+  <h3>What exactly is the benchmark</h3>
+  <p>
+    The venue is <strong>Kalshi</strong>, and it matters how their number is obtained, because the whole
+    comparison rests on it. Kalshi does not trade the Tomatometer directly: each contract is a yes/no bet
+    on a line, &ldquo;will this film finish above 70?&rdquo; But Kalshi also publishes its own implied
+    score over time, a field called <code>numerical_forecast</code>, which is the curve their app shows
+    traders. That published series is the benchmark, pulled at minute resolution over each contract&rsquo;s
+    life through a read-only, signed API. <span class="hl">So the market&rsquo;s number is theirs, not my
+    reconstruction of theirs,</span> which removes the obvious objection that I built the yardstick I am
+    measured against. The separate line-by-line contracts are scored too, as calibrated probabilities,
+    but they cover fewer films and are reported on their own denominator rather than blended in.
+  </p>
+</section>
+
+<!-- ============ DRIFT ============ -->
+<section id="drift">
+  <div class="kicker">What Actually Moves</div>
+  <h2>Scores drift down, and everyone already knows it</h2>
+  <p>
+    Because every review carries a second-level timestamp, the score can be reconstructed at any moment
+    in history: the score at time <em>T</em> is the fresh rate among reviews posted by <em>T</em>. Doing
+    that for a thousand films gives a thousand score curves, and they lean the same way. The
+    critics who post first are self-selected enthusiasts, often from outlets courting early access. As
+    the pool widens, harsher voices arrive and dilute the number.
+  </p>
+  <div class="stats">
+    <div class="stat"><div class="n">&minus;4.5 pts</div><div class="l">mean drift, embargo &rarr; settlement</div></div>
+    <div class="stat"><div class="n">~3 : 1</div><div class="l">falls outnumber rises</div></div>
+    <div class="stat"><div class="n">&minus;4.9 pts</div><div class="l">the same effect <em>inside</em> one film: its late reviews vs its early ones</div></div>
+    <div class="stat"><div class="n">&sigma; &asymp; 10</div><div class="l">per-film spread that remains</div></div>
+  </div>
+  <p>
+    Here is the trap. The average drift is common knowledge, so it is already in the price. Forecasting
+    &ldquo;it will fall about four points&rdquo; adds nothing. The only thing worth anything is
+    <strong>discrimination</strong>: separating the 88 that holds at 86 from the 88 that collapses to 68.
+  </p>
+
+  <div class="fig">
+    <svg viewBox="0 0 600 300" role="img" aria-label="Chart of Tomatometer score over the week: one film holds near its embargo score while another collapses, with the known average drift shown as a dashed line between them">
+      <!-- grid -->
+      <line x1="60" y1="230" x2="500" y2="230" stroke="#c7cedb" stroke-width="1.2"/>
+      <line x1="60" y1="30" x2="60" y2="230" stroke="#c7cedb" stroke-width="1.2"/>
+      <line x1="60" y1="172.9" x2="500" y2="172.9" stroke="#eef1f6" stroke-width="1"/>
+      <line x1="60" y1="115.7" x2="500" y2="115.7" stroke="#eef1f6" stroke-width="1"/>
+      <line x1="60" y1="58.6" x2="500" y2="58.6" stroke="#eef1f6" stroke-width="1"/>
+      <text x="52" y="234" text-anchor="end" font-size="9.5" fill="#5b6675">60</text>
+      <text x="52" y="176.9" text-anchor="end" font-size="9.5" fill="#5b6675">70</text>
+      <text x="52" y="119.7" text-anchor="end" font-size="9.5" fill="#5b6675">80</text>
+      <text x="52" y="62.6" text-anchor="end" font-size="9.5" fill="#5b6675">90</text>
+      <text x="22" y="130" text-anchor="middle" font-size="10" font-weight="700" fill="#5b6675" transform="rotate(-90 22 130)">Tomatometer</text>
+      <!-- x labels -->
+      <text x="95" y="248" text-anchor="middle" font-size="9.5" fill="#5b6675">Wed</text>
+      <text x="176" y="248" text-anchor="middle" font-size="9.5" fill="#5b6675">Thu</text>
+      <text x="257" y="248" text-anchor="middle" font-size="9.5" fill="#5b6675">Fri</text>
+      <text x="338" y="248" text-anchor="middle" font-size="9.5" fill="#5b6675">Sat</text>
+      <text x="419" y="248" text-anchor="middle" font-size="9.5" fill="#5b6675">Sun</text>
+      <text x="500" y="248" text-anchor="middle" font-size="9.5" fill="#5b6675">Mon</text>
+      <text x="95" y="264" text-anchor="middle" font-size="9" font-weight="700" fill="#3b5bdb">embargo lifts</text>
+      <text x="500" y="264" text-anchor="middle" font-size="9" font-weight="700" fill="#3b5bdb">settlement</text>
+      <line x1="95" y1="30" x2="95" y2="230" stroke="#c3d0f7" stroke-width="1" stroke-dasharray="3 3"/>
+      <line x1="500" y1="30" x2="500" y2="230" stroke="#c3d0f7" stroke-width="1" stroke-dasharray="3 3"/>
+
+      <!-- average drift (known, priced in) -->
+      <line x1="95" y1="70" x2="500" y2="95.7" stroke="#868e96" stroke-width="1.8" stroke-dasharray="6 4"/>
+      <text x="506" y="99" font-size="9.5" font-weight="700" fill="#868e96">known average</text>
+      <text x="506" y="111" font-size="9" fill="#868e96">(already in the price)</text>
+
+      <!-- holds -->
+      <path d="M95 70 C140 72,150 73,176 74 S230 76,257 77 S320 78.6,338 79 S460 81,500 81.4"
+            fill="none" stroke="#2f9e44" stroke-width="2.4"/>
+      <text x="506" y="82" font-size="9.5" font-weight="700" fill="#2f9e44">holds: 86</text>
+
+      <!-- collapses -->
+      <path d="M95 70 C130 82,155 90,176 95 S230 120,257 130 S315 152,338 158 S455 180,500 184.3"
+            fill="none" stroke="#e8590c" stroke-width="2.4"/>
+      <text x="506" y="188" font-size="9.5" font-weight="700" fill="#e8590c">collapses: 68</text>
+
+      <!-- shared start -->
+      <circle cx="95" cy="70" r="5" fill="#3b5bdb"/>
+      <text x="103" y="58" font-size="10" font-weight="700" fill="#3b5bdb">both open at 88</text>
+
+      <!-- the gap being modeled -->
+      <line x1="482" y1="81.4" x2="482" y2="184.3" stroke="#7048e8" stroke-width="1.4" stroke-dasharray="3 3"/>
+      <text x="474" y="138" text-anchor="end" font-size="9.5" font-weight="700" fill="#7048e8">18 pts</text>
+      <text x="474" y="150" text-anchor="end" font-size="9" fill="#7048e8">of separation</text>
+    </svg>
+    <div class="cap"><strong>Illustrative, not measured</strong> (the measured comparison is further
+      down). It shows two films that open at the same embargo number and settle 18 points apart. The dashed
+      grey line is what everybody, including the market, already expects. The model earns its keep only if
+      it can tell the green path from the orange one on Wednesday, which is why the drift stage is
+      scored on rank correlation, not on average error.</div>
+  </div>
+  <p>
+    That metric choice matters more than it sounds. Average error rewards a model for reproducing the
+    priced-in average, which is why it hid a real signal for weeks. Scoring on discrimination instead
+    <strong>revived a feature I had already retired</strong>: a measure of how harsh the critics who have
+    already posted are, relative to their own history, lifts drift-ranking correlation from 0.34 to 0.54
+    at the earliest horizon.
+  </p>
+</section>
+
+<!-- ============ DATA ============ -->
+<section id="data">
+  <div class="kicker">The Data</div>
+  <h2>None of this existed as a dataset</h2>
+  <p>
+    There is no download for any of this. Every asset below was collected, deduplicated and
+    date-guarded by hand, with resumable idempotent collectors: network work on worker threads, all
+    writes funneled through a single writer, every write an upsert, so an interrupted run costs minutes
+    rather than a restart.
+  </p>
+  <table>
+    <thead><tr><th>Asset</th><th>Scale</th><th>What it is for</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Films</strong></td><td>~1,000</td><td>Every film the market has ever traded, plus recent wide releases so the model also works on small films</td></tr>
+      <tr><td><strong>Reviews</strong></td><td>~193,000</td><td>Each one timestamped to the second, with verdict, critic, publication, top-critic flag and the critic&rsquo;s own grade where shown. This is what makes historical score curves reconstructable</td></tr>
+      <tr><td><strong>Pedigree graph</strong></td><td>~5,300 films</td><td>Directors&rsquo; and writers&rsquo; full filmographies with final scores, for cold-start priors. Studio track record falls out of it for free</td></tr>
+      <tr><td><strong>Cast graph</strong></td><td>3,200 actors</td><td>Top-billed cast and their filmographies, to test whether star power carries information</td></tr>
+      <tr><td><strong>Critic roster</strong></td><td>25,018 critics</td><td>Built from sitemaps, because the browsable directory silently truncates at 100 names per letter, a cap that would have quietly biased the roster</td></tr>
+      <tr><td><strong>Market history</strong></td><td>~178 markets</td><td>Minute-resolution implied score for every contract, read-only. Evaluation yardstick only, never an input</td></tr>
+    </tbody>
+  </table>
+  <p>
+    Two collection lessons were worth more than the rows they produced. The critic directory&rsquo;s
+    silent 100-per-letter cap is the kind of defect that never raises an error and quietly poisons every
+    downstream statistic. And the market history looked capped at 17 usable settled contracts until I
+    found the venue had reorganized its naming convention partway through; scanning properly recovered
+    around 178. <span class="hl">A number that looks small is sometimes a collection bug, not a
+    fact,</span> and in this case the difference decided whether the evaluation had any power at all.
+  </p>
+</section>
+
+<!-- ============ MODEL ============ -->
+<section id="model">
+  <div class="kicker">The Model</div>
+  <h2>A belief that starts from pedigree and is revised by every review</h2>
+  <p>
+    The forecast has to be valid at every moment, from before a single review exists to the minute
+    before settlement, and it has to get sharper as evidence lands. That shape is a filter: hold a
+    belief, then revise it as observations arrive. Four stages feed each other.
+  </p>
+
+  <div class="fig">
+    <svg viewBox="0 0 600 440" role="img" aria-label="Four-stage model chain: a cold-start prior from fundamentals, a review arrival model, a critic mix model, and a trajectory posterior, with reviews arriving as evidence and a conformal band on the output">
+      <defs>
+        <marker id="a1" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#3b5bdb"/></marker>
+        <marker id="a2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#e8590c"/></marker>
+      </defs>
+
+      <rect x="150" y="16" width="300" height="60" rx="10" fill="#eef2ff" stroke="#c3d0f7" stroke-width="1.4"/>
+      <text x="300" y="38" text-anchor="middle" font-size="12" font-weight="700" fill="#3b5bdb">1 &middot; Cold-start prior</text>
+      <text x="300" y="54" text-anchor="middle" font-size="9.5" fill="#5b6675">director, writer and studio track record, budget,</text>
+      <text x="300" y="68" text-anchor="middle" font-size="9.5" fill="#5b6675">runtime, language, franchise (before any review exists)</text>
+
+      <rect x="150" y="108" width="300" height="56" rx="10" fill="#eef2ff" stroke="#c3d0f7" stroke-width="1.4"/>
+      <text x="300" y="130" text-anchor="middle" font-size="12" font-weight="700" fill="#3b5bdb">2 &middot; How many reviews are still coming</text>
+      <text x="300" y="148" text-anchor="middle" font-size="9.5" fill="#5b6675">an arrival model: how much the number can still move</text>
+
+      <rect x="150" y="196" width="300" height="56" rx="10" fill="#eef2ff" stroke="#c3d0f7" stroke-width="1.4"/>
+      <text x="300" y="218" text-anchor="middle" font-size="12" font-weight="700" fill="#3b5bdb">3 &middot; Who has posted, who has not</text>
+      <text x="300" y="236" text-anchor="middle" font-size="9.5" fill="#5b6675">harshness of the critics seen so far, relative to their own history</text>
+
+      <rect x="150" y="284" width="300" height="60" rx="10" fill="#e7ecff" stroke="#3b5bdb" stroke-width="2"/>
+      <text x="300" y="306" text-anchor="middle" font-size="12" font-weight="700" fill="#3b5bdb">4 &middot; Trajectory posterior</text>
+      <text x="300" y="322" text-anchor="middle" font-size="9.5" fill="#5b6675">the live forecast at this minute, blended toward observed</text>
+      <text x="300" y="336" text-anchor="middle" font-size="9.5" fill="#5b6675">reality as review count grows</text>
+
+      <line x1="300" y1="76" x2="300" y2="106" stroke="#3b5bdb" stroke-width="1.8" marker-end="url(#a1)"/>
+      <line x1="300" y1="164" x2="300" y2="194" stroke="#3b5bdb" stroke-width="1.8" marker-end="url(#a1)"/>
+      <line x1="300" y1="252" x2="300" y2="282" stroke="#3b5bdb" stroke-width="1.8" marker-end="url(#a1)"/>
+
+      <!-- evidence stream on the left -->
+      <rect x="14" y="140" width="118" height="70" rx="10" fill="#fff6ec" stroke="#ffd8a8" stroke-width="1.4"/>
+      <text x="73" y="165" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e8590c">Reviews arrive</text>
+      <text x="73" y="182" text-anchor="middle" font-size="9" fill="#5b6675">timestamped,</text>
+      <text x="73" y="195" text-anchor="middle" font-size="9" fill="#5b6675">one at a time</text>
+      <path d="M132 175 H142 V225 H150" fill="none" stroke="#e8590c" stroke-width="1.6" marker-end="url(#a2)"/>
+      <path d="M132 168 H142 V136 H150" fill="none" stroke="#e8590c" stroke-width="1.6" marker-end="url(#a2)"/>
+      <path d="M132 182 H142 V313 H150" fill="none" stroke="#e8590c" stroke-width="1.6" marker-end="url(#a2)"/>
+
+      <!-- uncertainty on the right -->
+      <rect x="466" y="284" width="120" height="60" rx="10" fill="#f6f3ff" stroke="#e2d9fb" stroke-width="1.4"/>
+      <text x="526" y="306" text-anchor="middle" font-size="10.5" font-weight="700" fill="#7048e8">Conformal band</text>
+      <text x="526" y="322" text-anchor="middle" font-size="9" fill="#5b6675">sized from held-out</text>
+      <text x="526" y="334" text-anchor="middle" font-size="9" fill="#5b6675">residuals, not a formula</text>
+      <line x1="450" y1="314" x2="464" y2="314" stroke="#7048e8" stroke-width="1.6"/>
+
+      <!-- yardstick, deliberately outside -->
+      <rect x="150" y="376" width="300" height="50" rx="10" fill="#fff" stroke="#adb5bd" stroke-width="1.4" stroke-dasharray="5 4"/>
+      <text x="300" y="397" text-anchor="middle" font-size="11" font-weight="700" fill="#495057">Market price: evaluation only</text>
+      <text x="300" y="414" text-anchor="middle" font-size="9.5" fill="#868e96">never a feature, never a label, no arrow into the model</text>
+      <line x1="300" y1="344" x2="300" y2="374" stroke="#adb5bd" stroke-width="1.4" stroke-dasharray="4 3"/>
+    </svg>
+    <div class="cap">The chain as a filter. Stage 1 is the belief before evidence; stages 2 and 3 say how
+      much evidence is still outstanding and which way it leans; stage 4 is the posterior at this minute.
+      The market sits below the diagram on purpose: the dashed line is a comparison, not an input.</div>
+  </div>
+
+  <p>
+    The strongest single ingredient in the cold start turned out to be the <strong>studio&rsquo;s track
+    record</strong>, shrunk toward the global mean so a studio with three films does not out-vote one with
+    three hundred. Some coefficient signs read wrong until you think about who gets reviewed: English
+    language is a mild <em>negative</em>, because the foreign films that reach American critics are
+    already filtered down to the prestige ones, and a bigger budget is a negative too, because
+    tentpoles review worse than mid-budget films. Video-game adaptations sit near 50, biopics near 75.
+  </p>
+</section>
+
+<!-- ============ FINDINGS ============ -->
+<section id="findings">
+  <div class="kicker">What Held Up, What I Killed</div>
+  <h2>The honest pile</h2>
+  <p class="lead">
+    Most of what I built did not survive. That is the part of the project I would most want to be judged
+    on, so it is on the page: each kill below rests on a measurement, and several of them saved weeks of
+    collection I would otherwise have paid for.
+  </p>
+
+  <div class="callout warn">
+    <p style="margin-bottom:0"><strong>The biggest negative result, stated first.</strong> Before the
+      embargo lifts, in the cold-start phase where forecasting would be most valuable, the market
+      beats this model decisively, and not by a little. I did not leave that as an impression; I measured
+      the ceiling. The information in my public features explains 28% of the variance in the final score.
+      The market explains 72%. The correlation between the market&rsquo;s price and my own error is
+      <strong>+0.59</strong>: it is right precisely where I am wrong. Adding my features on top of the
+      market price moves its fit by about one point of R&sup2;. The market holds pre-release information
+      (tracking, screenings, buzz) that no public feature I found represents.</p>
+  </div>
+  <p style="font-size:.93em;color:var(--muted)">
+    Three caveats I keep attached to that paragraph, because it is the one people quote. My model sits at
+    about R&sup2; 0.20 against its own 0.28 feature ceiling, so a sliver of the gap is my modeling and
+    not the data. And the result proves my <em>current</em> features cannot close it, not that no
+    obtainable public feature could; I tested embargo lead, franchise and cast power since, and none of
+    them closed it, which makes the private-information reading more likely without proving it. That
+    analysis also predates the 140-market replay used in the chart below and has not been re-run
+    against it, so treat the direction as solid and the second decimal as not.
+  </p>
+
+  <p>
+    That result is why the framing of this project is &ldquo;explain,&rdquo; not &ldquo;beat.&rdquo; Here
+    is the whole comparison, on <strong>140 settled Kalshi markets</strong>, with the one arm that makes
+    it honest: a baseline that ignores the model entirely and just averages the reviews posted so far.
+  </p>
+  <p>
+    On the split protocol, because it is the first thing worth asking: these rows come from a per-vintage
+    replay: to score a given film at a given minute, the model is refit on only the films that had
+    already settled by that minute. The alternative, replaying history with today&rsquo;s champion, leaks
+    later settlements backwards into earlier forecasts, and the version of this table that does that is
+    kept separately and is not what is plotted here.
+  </p>
+
+  <div class="fig">
+    <svg viewBox="0 0 600 310" role="img" aria-label="Measured mean absolute error against horizon for the model, the Kalshi price and a running-average baseline, all on the same films in each column. The market is more accurate far out; close in the model and the baseline coincide.">
+      <line x1="92.0" y1="214.8" x2="486.0" y2="214.8" stroke="#eef1f6" stroke-width="1"/>
+      <text x="84" y="218.3" text-anchor="end" font-size="9.5" fill="#5b6675">0.1</text>
+      <line x1="92.0" y1="174.7" x2="486.0" y2="174.7" stroke="#eef1f6" stroke-width="1"/>
+      <text x="84" y="178.2" text-anchor="end" font-size="9.5" fill="#5b6675">0.3</text>
+      <line x1="92.0" y1="130.7" x2="486.0" y2="130.7" stroke="#eef1f6" stroke-width="1"/>
+      <text x="84" y="134.2" text-anchor="end" font-size="9.5" fill="#5b6675">1</text>
+      <line x1="92.0" y1="90.6" x2="486.0" y2="90.6" stroke="#eef1f6" stroke-width="1"/>
+      <text x="84" y="94.1" text-anchor="end" font-size="9.5" fill="#5b6675">3</text>
+      <line x1="92.0" y1="46.7" x2="486.0" y2="46.7" stroke="#eef1f6" stroke-width="1"/>
+      <text x="84" y="50.2" text-anchor="end" font-size="9.5" fill="#5b6675">10</text>
+      <line x1="92.0" y1="40.0" x2="92.0" y2="244.0" stroke="#c7cedb" stroke-width="1.2"/>
+      <line x1="92.0" y1="244.0" x2="486.0" y2="244.0" stroke="#c7cedb" stroke-width="1.2"/>
+      <text x="22" y="140" text-anchor="middle" font-size="10" font-weight="700" fill="#5b6675" transform="rotate(-90 22 140)">Mean absolute error (RT points)</text>
+      <text x="289" y="296" text-anchor="middle" font-size="10" font-weight="700" fill="#5b6675">Hours before the Monday cutoff</text>
+      <text x="118.0" y="260" text-anchor="middle" font-size="9.5" fill="#5b6675">144</text>
+      <text x="118.0" y="272" text-anchor="middle" font-size="8" fill="#9aa4b2">n=67</text>
+      <text x="179.3" y="260" text-anchor="middle" font-size="9.5" fill="#5b6675">96</text>
+      <text x="179.3" y="272" text-anchor="middle" font-size="8" fill="#9aa4b2">n=122</text>
+      <text x="240.7" y="260" text-anchor="middle" font-size="9.5" fill="#5b6675">48</text>
+      <text x="240.7" y="272" text-anchor="middle" font-size="8" fill="#9aa4b2">n=140</text>
+      <text x="302.0" y="260" text-anchor="middle" font-size="9.5" fill="#5b6675">24</text>
+      <text x="302.0" y="272" text-anchor="middle" font-size="8" fill="#9aa4b2">n=140</text>
+      <text x="363.3" y="260" text-anchor="middle" font-size="9.5" fill="#5b6675">12</text>
+      <text x="363.3" y="272" text-anchor="middle" font-size="8" fill="#9aa4b2">n=140</text>
+      <text x="424.7" y="260" text-anchor="middle" font-size="9.5" fill="#5b6675">2</text>
+      <text x="424.7" y="272" text-anchor="middle" font-size="8" fill="#9aa4b2">n=140</text>
+      <text x="486.0" y="260" text-anchor="middle" font-size="9.5" fill="#5b6675">0</text>
+      <text x="486.0" y="272" text-anchor="middle" font-size="8" fill="#9aa4b2">n=140</text>
+      <rect x="271.3" y="40.0" width="214.7" height="204.0" fill="#fff4e6" opacity="0.75"/>
+      <text x="378.7" y="53" text-anchor="middle" font-size="8.5" font-weight="700" fill="#e8590c">model and baseline are the same number here,</text>
+      <text x="378.7" y="64" text-anchor="middle" font-size="8.5" font-weight="700" fill="#e8590c">by construction, so the gap to the market is not a result</text>
+      <line x1="210.0" y1="40.0" x2="210.0" y2="244.0" stroke="#adb5bd" stroke-width="1.2" stroke-dasharray="5 4"/>
+      <text x="203.0" y="236" text-anchor="end" font-size="8.5" font-weight="700" fill="#868e96">market more accurate</text>
+      <polyline points="118.0,44.6 179.3,66.9 240.7,117.7 302.0,142.2 363.3,156.8 424.7,179.9 486.0,233.5" fill="none" stroke="#e8590c" stroke-width="3.4" opacity="0.95"/>
+      <polyline points="118.0,72.3 179.3,91.2 240.7,110.5 302.0,126.6 363.3,133.8 424.7,134.6 486.0,136.7" fill="none" stroke="#495057" stroke-width="2.4"/>
+      <polyline points="118.0,64.4 179.3,82.3 240.7,120.6 302.0,142.2 363.3,156.8 424.7,179.9 486.0,233.5" fill="none" stroke="#3b5bdb" stroke-width="2.4" stroke-dasharray="7 4"/>
+      <circle cx="118.0" cy="44.6" r="3.2" fill="#e8590c"/>
+      <circle cx="118.0" cy="72.3" r="3" fill="#495057"/>
+      <circle cx="118.0" cy="64.4" r="3" fill="#3b5bdb"/>
+      <circle cx="179.3" cy="66.9" r="3.2" fill="#e8590c"/>
+      <circle cx="179.3" cy="91.2" r="3" fill="#495057"/>
+      <circle cx="179.3" cy="82.3" r="3" fill="#3b5bdb"/>
+      <circle cx="240.7" cy="117.7" r="3.2" fill="#e8590c"/>
+      <circle cx="240.7" cy="110.5" r="3" fill="#495057"/>
+      <circle cx="240.7" cy="120.6" r="3" fill="#3b5bdb"/>
+      <circle cx="302.0" cy="142.2" r="3.2" fill="#e8590c"/>
+      <circle cx="302.0" cy="126.6" r="3" fill="#495057"/>
+      <circle cx="302.0" cy="142.2" r="3" fill="#3b5bdb"/>
+      <circle cx="363.3" cy="156.8" r="3.2" fill="#e8590c"/>
+      <circle cx="363.3" cy="133.8" r="3" fill="#495057"/>
+      <circle cx="363.3" cy="156.8" r="3" fill="#3b5bdb"/>
+      <circle cx="424.7" cy="179.9" r="3.2" fill="#e8590c"/>
+      <circle cx="424.7" cy="134.6" r="3" fill="#495057"/>
+      <circle cx="424.7" cy="179.9" r="3" fill="#3b5bdb"/>
+      <circle cx="486.0" cy="233.5" r="3.2" fill="#e8590c"/>
+      <circle cx="486.0" cy="136.7" r="3" fill="#495057"/>
+      <circle cx="486.0" cy="233.5" r="3" fill="#3b5bdb"/>
+      <text x="494" y="139.7" font-size="9.5" font-weight="700" fill="#495057">market</text>
+      <text x="494" y="229.5" font-size="9.5" font-weight="700" fill="#3b5bdb">model</text>
+      <text x="494" y="241.5" font-size="9.5" font-weight="700" fill="#e8590c">baseline</text>
+      <text x="92" y="16" font-size="9.5" fill="#5b6675"><tspan font-weight="700">At 144 hours</tspan> (n=67): market <tspan font-weight="700" fill="#495057">5.0</tspan>, model <tspan font-weight="700" fill="#3b5bdb">6.2</tspan>, baseline <tspan font-weight="700" fill="#e8590c">10.6</tspan></text>
+      <text x="92" y="30" font-size="9.5" fill="#5b6675"><tspan font-weight="700" fill="#2f9e44">model beats the baseline by 4.4</tspan>, <tspan font-weight="700" fill="#c92a2a">the market beats the model by 1.2</tspan></text>
+    </svg>
+    <div class="cap">Measured, not illustrative, and leakage-gated. Mean absolute error in Tomatometer
+      points, log scale, against Kalshi&rsquo;s own published implied score and against a baseline that
+      ignores the model and simply averages the reviews posted so far. Every row is replayed per vintage:
+      the model scoring a given moment was fit only on films that had already settled at that moment, so
+      no later settlement leaks backwards. <strong>All three arms are scored on the same films in every
+      column</strong>, which is why n shrinks on the left: the baseline does not exist before the first
+      review, so at 144 hours only 67 of the 140 markets qualify.</div>
+  </div>
+
+  <p>
+    That chart is the most useful thing I learned, and it is not flattering. <span class="hl">The model
+    beats the do-nothing baseline by a clear margin only at the horizons where the market beats the
+    model:</span> 6.2 against the baseline&rsquo;s 10.6 at six days, and 3.8 against 5.8 at four, paired
+    gaps of 4.4 [1.9, 7.3] and 2.0 [0.8, 3.5] points. From 24 hours in, where the model most clearly
+    beats the market, it is indistinguishable from simply averaging the reviews already posted. There is
+    a mechanical reason: the served number is a blend of the model and the running average, weighted by
+    the share of reviews still outstanding, so as that share goes to zero the forecast <em>becomes</em>
+    the running average by construction. Reporting the late-horizon win over the market without this
+    baseline would let an identity pose as a modeling result. So the baseline is scored as its own arm
+    in every table, and the numbers I would actually defend are the far ones, against the baseline, not
+    the near ones against the market.
+  </p>
+  <p>
+    Before the first review the running-average baseline does not exist, so that horizon needs a
+    different floor: predicting the same number for every film. Across the settled markets the
+    Tomatometer averages 67.4 with a standard deviation of 21.8, and always saying 67.4 earns a mean
+    absolute error of <strong>18.0</strong> (17.5 if you say the median instead, and both are computed
+    in-sample, which favors the constant). The model&rsquo;s cold start is <strong>11.2</strong>. The
+    market is <strong>8.2</strong>.
+  </p>
+  <p>
+    That is the shape of the cold-start result. Pedigree carries real information: knowing who
+    directed it, who wrote it and who released it cuts the error against a constant by about a third.
+    The market cuts it by about half. <span class="hl">So this is a gap between two informative
+    forecasters, not a case of useless features,</span> which is what makes the private-information
+    reading interesting rather than trivial.
+  </p>
+
+  <div class="decisions">
+    <div class="decision kept">
+      <h4>&#10003; Held: the drift is real and directional</h4>
+      <p>The score falls about 4.5 points on average, with falls outnumbering rises roughly three to one,
+         and the effect survives controlling for opening-day sample noise.</p>
+      <div class="why">But only the conditional mean is predictable. Most of the per-film spread is
+        small-sample mean reversion, which is irreducible.</div>
+    </div>
+    <div class="decision kept">
+      <h4>&#10003; Held: discrimination as the metric</h4>
+      <p>Switching the drift stage from average error to rank correlation recovered a signal I had already
+         retired: critic harshness lifts ranking correlation 0.34 &rarr; 0.54 at the earliest horizon.</p>
+      <div class="why">Average error pays a model for reproducing the average everyone already prices.
+        The metric was hiding the finding.</div>
+    </div>
+    <div class="decision kept">
+      <h4>&#10003; Held: the arrival model</h4>
+      <p>Predicting how many reviews are still to come cut error by about a third against the obvious
+         baseline, and the live version predicts the increment rather than the total.</p>
+      <div class="why">It is not a headline number, but it sets how far the score can still move, which
+        every interval downstream depends on.</div>
+    </div>
+    <div class="decision killed">
+      <h4>&#10007; Broke: the interval is honest on average, dishonest where it is narrowest</h4>
+      <p>The served band is nominal 90%. On a 156-film holdout it covers 89% per film (95% interval
+         0.86 to 0.92, so consistent with nominal) at a median width of 16 points. Cut by horizon it
+         falls apart exactly where the band is tightest: 70% coverage in the last 2 to 6 hours, 42% in
+         the last 2, 28% at the cutoff.</p>
+      <div class="why">This is the textbook failure of split conformal, measured rather than assumed:
+        the method guarantees coverage on <em>average</em>, and a user lives in one cell, never in the
+        average. In fairness to the band, at the cutoff it is 0.16 points wide and the median miss is
+        0.26 points, so it is a band collapsing to zero rather than a wild forecast. Still a
+        misstatement of confidence, and still unfixed.</div>
+    </div>
+    <div class="decision killed">
+      <h4>&#10007; Killed: the per-critic model</h4>
+      <p>The plan was to predict each outstanding critic&rsquo;s vote. It rests on harsh critics posting
+         late, and the correlation between a critic&rsquo;s harshness and when they typically post
+         is <strong>&minus;0.03</strong>. Outstanding critics are a lean-neutral draw.</p>
+      <div class="why">The drift is real but it lives per event, not per person: on a given film, whoever
+        reacts badly posts later. A fixed per-critic lean is mathematically blind to that. Killed on a
+        structural reason rather than a disappointing score.</div>
+    </div>
+    <div class="decision killed">
+      <h4>&#10007; Killed: star power, both ways</h4>
+      <p>Cast fame correlates <em>negatively</em> with score (&minus;0.24; A-listers anchor broad
+         tentpoles). Cast quality correlates +0.25 and is real on its own, but adds +0.004 R&sup2; over
+         fundamentals: it is collinear with director, writer and studio priors.</p>
+      <div class="why">This null was computed from films already in hand, with coverage on 978 of 1,001
+        titles, and it vetoed a roughly 20,000-film collection run. A well-powered null is a budget
+        decision.</div>
+    </div>
+    <div class="decision killed">
+      <h4>&#10007; Killed: the contrarian-critic axis</h4>
+      <p>I intended a second axis for critics who systematically disagree with consensus. Measuring first
+         showed they barely exist: median agreement +0.50, with under 1% of critics below zero.</p>
+      <div class="why">The feature pointed at an empty region of the data. Measuring before building cost
+        an afternoon instead of a week.</div>
+    </div>
+    <div class="decision killed">
+      <h4>&#10007; Demoted: embargo lead time</h4>
+      <p>How early a studio lets critics publish looked predictive, but globally it is redundant:
+         it is a symptom of budget, studio and director, all already encoded.</p>
+      <div class="why">Except on films with no pedigree at all, debut directors and obscure studios, where
+         it adds +0.118 R&sup2;. Kept strictly as a fallback for the cold-start case it actually helps.</div>
+    </div>
+  </div>
+
+  <p>
+    One more correction worth recording, because it was mine. An earlier version of my own write-up
+    claimed the model &ldquo;ties the market at every horizon.&rdquo; It does not, and the sentence was
+    sloppy in a specific way: it glued a <em>clock-time</em> claim to a <em>review-count</em> condition.
+    Unconditioned, the far horizons are clear losses. Conditioned on at least one review existing, two
+    horizons are statistically indistinguishable, but with 65 films and an interval three and a
+    half points wide, &ldquo;indistinguishable&rdquo; cannot separate <em>equal</em> from <em>the market
+    is better</em>, and the point estimate leans against me in both. <span class="hl">An underpowered
+    null is not a tie,</span> and the comparison script now prints both slices side by side so the claim
+    cannot be quoted loosely again.
+  </p>
+  <p>
+    One stage is designed but deliberately not built, and saying so is part of the record:
+    the text of the reviews is unused. A model that reads the prose of the reviews already posted, to
+    predict the verdicts of the critics still outstanding, is the obvious next accuracy engine. It is
+    gated behind an experiment that has to show text beats verdicts alone before it earns the complexity.
+  </p>
+</section>
+
+<!-- ============ PRODUCTION ============ -->
+<section id="production">
+  <div class="kicker">In Production</div>
+  <h2>It runs whether or not I am watching</h2>
+  <p>
+    A forecast that only exists in a notebook cannot be wrong in public, so the whole thing runs
+    unattended on Google Cloud. Contracts are live for a few days at a time, which means onboarding a
+    new film, polling the market, noticing new reviews, refreshing an explanation and recording what the
+    forecast said at each minute all have to happen without me.
+  </p>
+
+  <div class="fig">
+    <svg viewBox="0 0 600 412" role="img" aria-label="Architecture: a single-writer loop on a VM writes to Cloud SQL each minute, a scale-to-zero API reads from it, a model registry serves the champion model, and a weekly retraining job promotes only through four gates">
+      <defs>
+        <marker id="b1" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#3b5bdb"/></marker>
+        <marker id="b2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#7048e8"/></marker>
+        <marker id="b3" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#2f9e44"/></marker>
+      </defs>
+
+      <!-- external sources -->
+      <rect x="16" y="20" width="140" height="44" rx="9" fill="#fff6ec" stroke="#ffd8a8" stroke-width="1.3"/>
+      <text x="86" y="40" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e8590c">Market feed</text>
+      <text x="86" y="55" text-anchor="middle" font-size="9" fill="#5b6675">polled every minute</text>
+
+      <rect x="16" y="80" width="140" height="44" rx="9" fill="#fff6ec" stroke="#ffd8a8" stroke-width="1.3"/>
+      <text x="86" y="100" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e8590c">Review site</text>
+      <text x="86" y="115" text-anchor="middle" font-size="9" fill="#5b6675">cheap count check first</text>
+
+      <!-- the loop -->
+      <rect x="196" y="20" width="208" height="104" rx="11" fill="#eef2ff" stroke="#3b5bdb" stroke-width="1.8"/>
+      <text x="300" y="42" text-anchor="middle" font-size="11.5" font-weight="700" fill="#3b5bdb">Live loop (always-on VM)</text>
+      <text x="300" y="60" text-anchor="middle" font-size="9.5" fill="#5b6675">the <tspan font-weight="700">only</tspan> process that writes</text>
+      <text x="300" y="76" text-anchor="middle" font-size="9.5" fill="#5b6675">one forecast row per open contract, per tick</text>
+      <text x="300" y="92" text-anchor="middle" font-size="9.5" fill="#5b6675">full re-read only when the site has more</text>
+      <text x="300" y="108" text-anchor="middle" font-size="9.5" fill="#5b6675">reviews than the database does</text>
+
+      <line x1="156" y1="42" x2="194" y2="52" stroke="#e8590c" stroke-width="1.5" marker-end="url(#b1)"/>
+      <line x1="156" y1="102" x2="194" y2="92" stroke="#e8590c" stroke-width="1.5" marker-end="url(#b1)"/>
+
+      <!-- timers -->
+      <rect x="424" y="20" width="160" height="104" rx="9" fill="#fbfcfe" stroke="#e3e8ef" stroke-width="1.3"/>
+      <text x="504" y="40" text-anchor="middle" font-size="10.5" font-weight="700" fill="#495057">Scheduled jobs</text>
+      <text x="504" y="57" text-anchor="middle" font-size="9" fill="#5b6675">onboard new films hourly</text>
+      <text x="504" y="71" text-anchor="middle" font-size="9" fill="#5b6675">watch for embargo dates</text>
+      <text x="504" y="85" text-anchor="middle" font-size="9" fill="#5b6675">model monitors, cost ledger</text>
+      <text x="504" y="99" text-anchor="middle" font-size="9" fill="#5b6675">Monday settlement report</text>
+      <text x="504" y="115" text-anchor="middle" font-size="8.5" font-style="italic" fill="#868e96">a health endpoint watches all of them</text>
+
+      <!-- database -->
+      <rect x="196" y="168" width="208" height="58" rx="11" fill="#e7ecff" stroke="#3b5bdb" stroke-width="2"/>
+      <text x="300" y="192" text-anchor="middle" font-size="11.5" font-weight="700" fill="#3b5bdb">Managed Postgres</text>
+      <text x="300" y="209" text-anchor="middle" font-size="9.5" fill="#5b6675">forecast history, markets, reviews, costs</text>
+      <line x1="300" y1="124" x2="300" y2="166" stroke="#3b5bdb" stroke-width="1.8" marker-end="url(#b1)"/>
+      <path d="M504 124 V147 H310 V166" fill="none" stroke="#adb5bd" stroke-width="1.4" marker-end="url(#b1)"/>
+
+      <!-- api -->
+      <rect x="16" y="168" width="150" height="58" rx="9" fill="#fbfcfe" stroke="#e3e8ef" stroke-width="1.3"/>
+      <text x="91" y="188" text-anchor="middle" font-size="10.5" font-weight="700" fill="#495057">Read API</text>
+      <text x="91" y="204" text-anchor="middle" font-size="9" fill="#5b6675">scales to zero</text>
+      <text x="91" y="217" text-anchor="middle" font-size="9" fill="#5b6675">forecasts, explanations</text>
+      <line x1="194" y1="197" x2="170" y2="197" stroke="#3b5bdb" stroke-width="1.5" marker-end="url(#b1)"/>
+
+      <!-- registry -->
+      <rect x="424" y="168" width="160" height="58" rx="9" fill="#f6f3ff" stroke="#e2d9fb" stroke-width="1.4"/>
+      <text x="504" y="186" text-anchor="middle" font-size="10.5" font-weight="700" fill="#7048e8">Model registry</text>
+      <text x="504" y="202" text-anchor="middle" font-size="9" fill="#5b6675">one movable pointer to the champion;</text>
+      <text x="504" y="215" text-anchor="middle" font-size="9" fill="#5b6675">the loop and the API load what it names</text>
+      <line x1="422" y1="197" x2="406" y2="197" stroke="#c0b6e8" stroke-width="1.3" stroke-dasharray="4 3"/>
+
+      <!-- retrain -->
+      <rect x="150" y="266" width="300" height="52" rx="10" fill="#f7fdf8" stroke="#b2f2bb" stroke-width="1.5"/>
+      <text x="300" y="288" text-anchor="middle" font-size="11" font-weight="700" fill="#2f9e44">Weekly retrain job: Mondays, after settlement</text>
+      <text x="300" y="305" text-anchor="middle" font-size="9.5" fill="#5b6675">newly settled contracts become training rows</text>
+      <path d="M300 226 V264" fill="none" stroke="#2f9e44" stroke-width="1.6" marker-end="url(#b3)"/>
+
+      <!-- gates -->
+      <rect x="40" y="340" width="120" height="44" rx="8" fill="#fff" stroke="#b2f2bb" stroke-width="1.3"/>
+      <text x="100" y="358" text-anchor="middle" font-size="9" font-weight="700" fill="#2f9e44">1 &middot; it loads</text>
+      <text x="100" y="373" text-anchor="middle" font-size="8.5" fill="#5b6675">and actually serves</text>
+
+      <rect x="172" y="340" width="120" height="44" rx="8" fill="#fff" stroke="#b2f2bb" stroke-width="1.3"/>
+      <text x="232" y="358" text-anchor="middle" font-size="9" font-weight="700" fill="#2f9e44">2 &middot; no data lost</text>
+      <text x="232" y="373" text-anchor="middle" font-size="8.5" fill="#5b6675">superset of champion&rsquo;s</text>
+
+      <rect x="304" y="340" width="120" height="44" rx="8" fill="#fff" stroke="#b2f2bb" stroke-width="1.3"/>
+      <text x="364" y="358" text-anchor="middle" font-size="9" font-weight="700" fill="#2f9e44">3 &middot; held-out slice</text>
+      <text x="364" y="373" text-anchor="middle" font-size="8.5" fill="#5b6675">not worse than last week</text>
+
+      <rect x="436" y="340" width="124" height="44" rx="8" fill="#fff" stroke="#b2f2bb" stroke-width="1.3"/>
+      <text x="498" y="358" text-anchor="middle" font-size="9" font-weight="700" fill="#2f9e44">4 &middot; no wild swing</text>
+      <text x="498" y="373" text-anchor="middle" font-size="8.5" fill="#5b6675">within historical movement</text>
+
+      <path d="M300 318 V330" fill="none" stroke="#2f9e44" stroke-width="1.6"/>
+      <path d="M100 330 H500" fill="none" stroke="#2f9e44" stroke-width="1.4"/>
+      <line x1="100" y1="330" x2="100" y2="338" stroke="#2f9e44" stroke-width="1.4" marker-end="url(#b3)"/>
+      <line x1="232" y1="330" x2="232" y2="338" stroke="#2f9e44" stroke-width="1.4" marker-end="url(#b3)"/>
+      <line x1="364" y1="330" x2="364" y2="338" stroke="#2f9e44" stroke-width="1.4" marker-end="url(#b3)"/>
+      <line x1="498" y1="330" x2="498" y2="338" stroke="#2f9e44" stroke-width="1.4" marker-end="url(#b3)"/>
+      <text x="300" y="398" text-anchor="middle" font-size="9.5" font-style="italic" fill="#2f9e44">all four gates must pass, or the pointer does not move</text>
+    </svg>
+    <div class="cap">Two design constraints shape this picture. Exactly one process writes, so a minute-by-minute
+      forecast log cannot be corrupted by two workers racing. And the pointer to the live model only moves when
+      four gates pass, so a retrain that runs while nobody is looking cannot quietly make the product worse.</div>
+  </div>
+
+  <h3>Why retraining needed gates rather than a cron line</h3>
+  <p>
+    The model gets better as contracts settle and become labeled data, so retraining weekly is obviously
+    right. The risk is equally obvious: a job that trains and promotes on its own can promote something
+    worse and nobody finds out until the forecasts look strange. Each gate answers a specific failure I have already had: the artifact loads but cannot serve; the new training set silently drops
+    contracts the current champion learned from; the candidate looks better only because it is being
+    scored on data it trained on; the candidate is fine on average but has moved its opening forecasts
+    further in one week than any week in over two years of replayed history. The last one is the
+    interesting gate, because it catches a model that is <em>defensible on the test set</em> and still
+    behaving unlike itself.
+  </p>
+
+  <h3>Shipping without breaking the record</h3>
+  <p>
+    Deploys have to earn their way out. A push must have a green build for that exact commit before the deploy
+    script will proceed; a dirty working tree or an unpushed commit stops it; images are built once and
+    released by content hash so the thing tested is the thing that ships; the new revision takes no traffic
+    until its heavy paths are warm and a contract check passes; and a failed post-deploy check rolls both
+    services back on its own. That rollback has fired for real on a live deploy, which is the only way to
+    know it works.
+  </p>
+  <div class="callout">
+    <p style="margin-bottom:0"><strong>What it costs.</strong> The read API scales to zero, which keeps
+      idle spend near nothing but means a first request after a quiet period waits roughly 35 to 40 seconds
+      for a cold start. That is a real wait, and it is a deliberate trade: this is a portfolio system, and
+      I would rather pay it than keep a warm instance running around the clock. The writing loop, which
+      genuinely cannot miss a minute, runs on an always-on instance instead.</p>
+  </div>
+</section>
+
+<!-- ============ DECISIONS ============ -->
+<section id="decisions">
+  <div class="kicker">Key Decisions</div>
+  <h2>The calls that shaped the project</h2>
+  <div class="decisions">
+    <div class="decision">
+      <h4>The market never enters training</h4>
+      <p>Not as a feature, not as a label, not as a target to distill from. It appears only in evaluation code.</p>
+      <div class="why">Why: the entire question is whether public information can reach the market&rsquo;s
+        answer. A model that has seen the price would reproduce it and prove nothing. Giving up the single
+        most predictive column available is the cost of being able to interpret the result at all.</div>
+    </div>
+    <div class="decision">
+      <h4>Reconstruct history from timestamps instead of snapshots</h4>
+      <p>Rather than recording the score daily going forward, the score at any past moment is recomputed
+         from the reviews posted by then.</p>
+      <div class="why">Why: waiting to accumulate snapshots would have meant a year before there was
+        anything to model. Timestamps turn one collection pass into a thousand full historical curves,
+        and make every horizon evaluable at once.</div>
+    </div>
+    <div class="decision">
+      <h4>Measure before collecting</h4>
+      <p>Two expensive collection runs were canceled by cheap proxy tests computed on data already in hand.</p>
+      <div class="why">Why: a well-powered null on a proxy is evidence, and the alternative was days of
+        collection to learn the same thing. The discipline is to ask what result would change the plan
+        before paying for the data.</div>
+    </div>
+    <div class="decision">
+      <h4>Date-guard every prior</h4>
+      <p>A director&rsquo;s track record for a target film is computed only from films released strictly
+         before it, and a popularity field was dropped entirely because it reflects today, not release day.</p>
+      <div class="why">Why: pedigree features are the easiest place in this project to leak the future.
+        Guarding by date costs a WHERE clause; not guarding it invalidates every number on this page.</div>
+    </div>
+    <div class="decision">
+      <h4>One writer, many readers</h4>
+      <p>A single loop holds all write access to the forecast log; the API and every dashboard read.</p>
+      <div class="why">Why: the deliverable is an append-only record of what was believed at each minute.
+        Two writers racing produce a record that cannot be trusted retrospectively, and the whole
+        evaluation rests on that record.</div>
+    </div>
+    <div class="decision">
+      <h4>Intervals sized from residuals</h4>
+      <p>Prediction bands are sized from held-out errors rather than from a distributional formula, and
+         the coverage they actually delivered is measured by slice rather than quoted as a headline.</p>
+      <div class="why">Why: a distributional assumption gives you a number that cannot be checked
+        against anything. Sizing from real residuals at least makes the claim falsifiable, which is how
+        the conditional-coverage failure above was found rather than assumed away. An interval that is
+        confidently too narrow is the worst failure available, because it is the number a reader acts on.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STACK ============ -->
+<section id="stack">
+  <div class="kicker">Stack at a Glance</div>
+  <h2>Technology choices</h2>
+  <table>
+    <thead><tr><th>Layer</th><th>Choice</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Modeling</strong></td><td>XGBoost, scikit-learn, conformal quantile regression</td><td>Monotone constraints on pedigree features; absolute-error objective</td></tr>
+      <tr><td><strong>Experiment tracking</strong></td><td>MLflow tracking + model registry</td><td>Registry backed by Cloud SQL; one movable champion alias</td></tr>
+      <tr><td><strong>Serving</strong></td><td>FastAPI on Google Cloud Run</td><td>Scale-to-zero; forecasts, explanations, performance and cost endpoints</td></tr>
+      <tr><td><strong>Live pipeline</strong></td><td>Python loop as a systemd service on a small Compute Engine VM</td><td>Single writer, one-minute cadence, connects through the Cloud SQL Auth Proxy</td></tr>
+      <tr><td><strong>Store</strong></td><td>PostgreSQL on Cloud SQL</td><td>SQLite for local development and the research corpus</td></tr>
+      <tr><td><strong>Collection</strong></td><td>Threaded, resumable collectors; Playwright where a page needs a browser</td><td>Idempotent upserts; an interrupted run resumes rather than restarts</td></tr>
+      <tr><td><strong>Explainability</strong></td><td>SHAP decomposition of the cold-start prior</td><td>Refreshed live, so every forecast can be attributed to features</td></tr>
+      <tr><td><strong>Retraining</strong></td><td>Cloud Run Job on a weekly schedule</td><td>Four promotion gates; every attempt logged; one-command rollback</td></tr>
+      <tr><td><strong>Delivery</strong></td><td>GitHub Actions; keyless auth via Workload Identity Federation</td><td>Build once, release by commit hash; deploy refuses to run on a red build</td></tr>
+      <tr><td><strong>Safety nets</strong></td><td>Automatic rollback on a failed post-deploy check; secret scanning; a pipeline health endpoint</td><td>Rollback has been exercised on a real deploy</td></tr>
+      <tr><td><strong>Cost control</strong></td><td>A cost ledger fed by metered, modeled and invoiced sources</td><td>Both Cloud Run services scale to zero; the live-loop VM is the one thing always on</td></tr>
+      <tr><td><strong>Testing</strong></td><td>pytest offline suite, contract checks against production, a browser smoke test</td><td>Plus a property-level evaluation gate on the assistant layer</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:20px;font-size:.95em;color:var(--muted)">
+    The live system is not linked publicly, and I am happy to walk through it directly instead:
+    the forecast log, the performance page, the retrain history.
+  </p>
+</section>
+
+</div>
+
+<footer>
+  <p>Raghuvir Jonnagiri &middot;
+     <a href="mailto:raghuvir.jonnagiri@gmail.com">raghuvir.jonnagiri@gmail.com</a> &middot;
+     <a href="https://RaghuvirJonnagiri.github.io/">more write-ups</a></p>
+</footer>
+
+</body>
+</html>
