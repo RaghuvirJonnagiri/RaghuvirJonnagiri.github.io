@@ -23,24 +23,46 @@
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-    color:var(--ink);background:var(--bg);line-height:1.65;font-size:17px}
-  .wrap{max-width:920px;margin:0 auto;padding:0 20px}
+    color:var(--ink);background:var(--bg);line-height:1.7;font-size:17.5px}
+  .wrap{max-width:960px;margin:0 auto;padding:0 20px}
+  /* The reading column is narrower than the card. 68 characters is the comfortable measure;
+     figures and tables are free to use the full card width. */
+  section p,section h2,section h3,section ul,section ol,.kicker{max-width:37em}
+  /* figures deliberately run wider than the measure, so the extra width reads as a breakout */
+  .fig,.decisions,.stats,table{max-width:none}
   header{background:linear-gradient(135deg,#283a96 0%,#4a2aa6 100%);color:#fff;
-    padding:64px 20px 56px;text-align:center}
-  header h1{font-size:2.4em;line-height:1.15;margin-bottom:14px;letter-spacing:-.5px}
-  header p{font-size:1.12em;opacity:.92;max-width:660px;margin:0 auto;color:#fff}
-  .tags{margin-top:22px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+    padding:52px 20px 44px}
+  header .wrap{max-width:960px}
+  header h1{font-size:1.95em;line-height:1.2;margin-bottom:12px;letter-spacing:-.4px;max-width:17em}
+  header p{font-size:1.04em;opacity:.92;max-width:38em;color:#fff}
+  .answer{font-size:1.02em;margin-top:18px;background:rgba(255,255,255,.13);
+    border-left:3px solid rgba(255,255,255,.55);border-radius:0 8px 8px 0;
+    padding:13px 18px;max-width:40em}
+  .answer strong{color:#fff}
+  .tags{margin-top:20px;display:flex;gap:8px;flex-wrap:wrap}
   .tag{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);
     padding:5px 13px;border-radius:999px;font-size:.82em;font-weight:600}
   nav{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.97);
     backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
-  nav .wrap{display:flex;gap:6px;overflow-x:auto;padding:10px 20px}
+  nav .wrap{display:flex;gap:6px;overflow-x:auto;padding:10px 20px;
+    scrollbar-width:none;-ms-overflow-style:none}
+  nav .wrap::-webkit-scrollbar{display:none}
   nav a{color:var(--muted);text-decoration:none;font-size:.86em;font-weight:600;
     white-space:nowrap;padding:6px 12px;border-radius:6px}
   nav a:hover{background:var(--bg);color:var(--brand)}
   section{background:var(--card);border:1px solid var(--line);border-radius:14px;
-    padding:34px;margin:26px 0;box-shadow:0 1px 3px rgba(20,30,60,.04)}
-  h2{font-size:1.5em;color:var(--ink);margin-bottom:8px;letter-spacing:-.3px}
+    padding:38px 44px;margin:24px 0;box-shadow:0 1px 3px rgba(20,30,60,.04)}
+  h2{font-size:1.42em;color:var(--ink);margin-bottom:14px;letter-spacing:-.3px;line-height:1.3}
+  /* first paragraph of a section carries the section; give it weight */
+  section > p:first-of-type{font-size:1.06em;color:#1f2733}
+  /* a standalone line that states the point of the section */
+  .point{font-size:1.14em;line-height:1.5;color:var(--ink);font-weight:600;
+    border-left:3px solid var(--brand);padding:2px 0 2px 16px;margin:24px 0;max-width:34em}
+  ol.caveats{max-width:40em;margin:14px 0 18px;padding-left:0;list-style:none;counter-reset:c}
+  ol.caveats li{position:relative;padding-left:34px;margin-bottom:11px;color:#2a3340}
+  ol.caveats li:before{counter-increment:c;content:counter(c);position:absolute;left:0;top:2px;
+    width:22px;height:22px;border-radius:50%;background:#eef2ff;color:var(--brand);
+    font-size:.74em;font-weight:800;display:flex;align-items:center;justify-content:center}
   .kicker{text-transform:uppercase;letter-spacing:1.5px;font-size:.72em;
     font-weight:700;color:var(--brand);margin-bottom:14px}
   h3{font-size:1.12em;color:var(--brand2);margin:26px 0 8px}
@@ -48,15 +70,22 @@
   .lead{font-size:1.08em}
   strong{color:var(--ink)}
   .fig{background:#fbfcfe;border:1px solid var(--line);border-radius:12px;
-    padding:18px;margin:22px 0;text-align:center}
-  .fig svg{max-width:100%;height:auto}
-  .cap{font-size:.86em;color:var(--muted);margin-top:10px;font-style:italic;text-align:left}
-  .callout{border-left:4px solid var(--brand);background:#f3f6ff;padding:16px 18px;
-    border-radius:0 8px 8px 0;margin:18px 0}
+    padding:20px 22px 16px;margin:26px 0;text-align:center}
+  .fig svg{max-width:100%;height:auto;display:block;margin:0 auto}
+  .fig svg.only-phone{display:none}
+  .cap{font-size:.88em;line-height:1.6;color:var(--muted);margin-top:14px;text-align:left;
+    border-top:1px solid var(--line);padding-top:12px}
+  .cap b,.cap strong{color:#3d4756}
+  .callout{background:#f3f6ff;border:1px solid #dbe4ff;padding:18px 20px;
+    border-radius:10px;margin:22px 0;max-width:40em}
   .callout.warn{border-left-color:var(--accent);background:#fff6ec}
-  .hl{background:#fff3bf;padding:1px 5px;border-radius:3px}
+  .hl{background:none;padding:0;font-weight:600;color:var(--ink);
+    box-shadow:inset 0 -.5em 0 rgba(255,214,102,.38)}
   .decisions{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:22px 0}
-  .decision{border:1px solid var(--line);border-radius:10px;padding:18px;background:#fbfcfe}
+  .decisions{align-items:stretch}
+  .decision{border:1px solid var(--line);border-radius:10px;padding:18px;background:#fbfcfe;
+    display:flex;flex-direction:column}
+  .decision .why{margin-top:auto}
   .decision h4{font-size:.95em;font-weight:700;color:var(--ink);margin-bottom:6px}
   .decision .why{font-size:.85em;color:var(--muted);margin-top:8px;padding-top:8px;
     border-top:1px solid var(--line)}
@@ -69,9 +98,10 @@
   th,td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--line)}
   th{background:#fbfcfe;font-size:.8em;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}
-  .stat{border:1px solid var(--line);border-radius:10px;padding:16px;background:#fbfcfe;text-align:center}
-  .stat .n{font-size:1.45em;font-weight:800;color:var(--brand);letter-spacing:-.5px;line-height:1.2}
-  .stat .l{font-size:.78em;color:var(--muted);margin-top:4px}
+  .stat{border:1px solid var(--line);border-radius:10px;padding:18px 16px;background:#fbfcfe;
+    text-align:center}
+  .stat .n{font-size:1.7em;font-weight:800;color:var(--brand);letter-spacing:-.6px;line-height:1.15}
+  .stat .l{font-size:.79em;color:var(--muted);margin-top:6px;line-height:1.45}
   code{background:#f1f3f9;padding:1px 5px;border-radius:4px;font-size:.88em}
   footer{text-align:center;color:var(--muted);padding:36px 20px;font-size:.92em}
   footer a{color:var(--brand)}
@@ -89,12 +119,21 @@
     td:first-child{font-size:1.02em;margin-bottom:2px}
     td:nth-child(2){color:var(--brand);font-weight:700;font-size:.9em;margin-bottom:6px}
     .fig{overflow-x:auto;-webkit-overflow-scrolling:touch;text-align:left}
-    .fig svg{min-width:540px;max-width:none}
+    .fig svg{min-width:520px;max-width:none}
+    /* figures that still have to pan say so, rather than silently hiding half a chart */
+    .fig.pans .cap:before{content:"Swipe the chart sideways to see all of it. ";
+      color:var(--brand);font-weight:700}
     .cap{min-width:0}
+    /* the bar chart gets a real phone layout instead of a pan */
+    .fig svg.only-wide{display:none}
+    .fig svg.only-phone{display:block;min-width:0}
+    .fig:has(.only-phone){overflow-x:visible}
     .decisions{grid-template-columns:1fr}
     .stats{grid-template-columns:1fr 1fr}
-    header h1{font-size:1.75em}
-    section{padding:22px}
+    header h1{font-size:1.5em;max-width:none}
+    header{padding:38px 20px 32px}
+    section{padding:24px 22px}
+    .point{font-size:1.06em;margin:20px 0}
   }
 </style>
 </head>
@@ -104,17 +143,13 @@
   <div class="wrap">
     <h1>Can a Transparent Model Explain a Prediction Market?</h1>
     <p>A prediction market prices where a movie&rsquo;s Rotten&nbsp;Tomatoes score will settle on Monday.
-       I forecast the same number at every minute of the week, from pedigree alone before any review
-       exists to a posterior revised by each review that lands, and never let the model see the market.</p>
-    <p style="font-size:1.02em;margin-top:14px;background:rgba(255,255,255,.14);
-       border:1px solid rgba(255,255,255,.26);border-radius:10px;padding:12px 16px;max-width:660px;
-       margin-left:auto;margin-right:auto">
-       <strong style="color:#fff">The short answer is no, and that is the finding.</strong> Before the
-       embargo lifts, the market holds private information my public features cannot represent, and it
-       beats me decisively. Afterwards we converge, but so does simply averaging the reviews already
-       posted, which turns out to be most of what the convergence is. Both are measured below.</p>
-    <p style="font-size:.9em;opacity:.85;margin-top:14px">A solo project: I collected the data, built the
-       models, and keep the pipeline running unattended on Google&nbsp;Cloud.</p>
+       I forecast the same number every minute of that week, and never let the model see the market.</p>
+    <p class="answer">
+       <strong>The short answer is no, and that is the finding.</strong> Before the embargo lifts the
+       market beats me decisively. Afterwards we converge, but so does simply averaging the reviews
+       already posted, which turns out to be most of what the convergence is.</p>
+    <p style="font-size:.88em;opacity:.8;margin-top:14px">A solo project: I collected the data, built
+       the models, and keep the pipeline running unattended on Google&nbsp;Cloud.</p>
     <div class="tags">
       <span class="tag">Sequential forecasting</span>
       <span class="tag">Self-collected data</span>
@@ -153,13 +188,19 @@
     is whether <strong>public information alone</strong> can land where that opaque price lands.
   </p>
   <p>
-    That question has two halves, and they are very different problems. Before the embargo lifts there is
-    no review to read, so the only evidence is pedigree: who directed it, who wrote it, which studio
-    released it, what it cost, how long it is. After the embargo lifts, reviews start landing one at a
-    time, each timestamped, and the forecast has to <strong>absorb them as they arrive</strong> and keep
-    projecting forward to the Monday deadline, when critics who have not yet filed will have filed. The
-    first half is a cold-start prediction. The second is a sequential one, and it is the larger part of
-    the work: the number you are predicting keeps moving while you predict it.
+    That question has two halves, and they are very different problems.
+  </p>
+  <p>
+    Before the embargo lifts there is no review to read, so the only evidence is pedigree: who directed
+    it, who wrote it, which studio released it, what it cost, how long it is. That half is a cold-start
+    prediction.
+  </p>
+  <p>
+    After the embargo lifts, reviews start landing one at a time, each timestamped, and the forecast has
+    to <strong>absorb them as they arrive</strong> and keep projecting forward to the Monday deadline,
+    when critics who have not yet filed will have filed. That half is sequential, and it is the larger
+    part of the work: <span class="hl">the number you are predicting keeps moving while you predict
+    it.</span>
   </p>
   <div class="callout">
     <p style="margin-bottom:0"><strong>The thesis.</strong> If a transparent model built only from public
@@ -177,13 +218,17 @@
   <p>
     The venue is <strong>Kalshi</strong>, and it matters how their number is obtained, because the whole
     comparison rests on it. Kalshi does not trade the Tomatometer directly: each contract is a yes/no bet
-    on a line, &ldquo;will this film finish above 70?&rdquo; But Kalshi also publishes its own implied
-    score over time, a field called <code>numerical_forecast</code>, which is the curve their app shows
-    traders. That published series is the benchmark, pulled at minute resolution over each contract&rsquo;s
-    life through a read-only, signed API. <span class="hl">So the market&rsquo;s number is theirs, not my
-    reconstruction of theirs,</span> which removes the obvious objection that I built the yardstick I am
-    measured against. The separate line-by-line contracts are scored too, as calibrated probabilities,
-    but they cover fewer films and are reported on their own denominator rather than blended in.
+    on a line, &ldquo;will this film finish above 70?&rdquo;
+  </p>
+
+  <p>
+    But Kalshi also publishes its own implied score over time, a field called
+    <code>numerical_forecast</code>, which is the curve their app shows traders. That published series is
+    the benchmark, pulled at minute resolution over each contract&rsquo;s life through a read-only,
+    signed API. <span class="hl">So the market&rsquo;s number is theirs, not my reconstruction of
+    theirs,</span> which removes the obvious objection that I built the yardstick I am measured against.
+    The separate line-by-line contracts are scored too, as calibrated probabilities, but they cover fewer
+    films and are reported on their own denominator rather than blended in.
   </p>
 </section>
 
@@ -210,7 +255,7 @@
     <strong>discrimination</strong>: separating the 88 that holds at 86 from the 88 that collapses to 68.
   </p>
 
-  <div class="fig">
+  <div class="fig pans">
     <svg viewBox="0 0 600 300" role="img" aria-label="Chart of Tomatometer score over the week: one film holds near its embargo score while another collapses, with the known average drift shown as a dashed line between them">
       <!-- grid -->
       <line x1="60" y1="230" x2="500" y2="230" stroke="#c7cedb" stroke-width="1.2"/>
@@ -218,46 +263,46 @@
       <line x1="60" y1="172.9" x2="500" y2="172.9" stroke="#eef1f6" stroke-width="1"/>
       <line x1="60" y1="115.7" x2="500" y2="115.7" stroke="#eef1f6" stroke-width="1"/>
       <line x1="60" y1="58.6" x2="500" y2="58.6" stroke="#eef1f6" stroke-width="1"/>
-      <text x="52" y="234" text-anchor="end" font-size="9.5" fill="#5b6675">60</text>
-      <text x="52" y="176.9" text-anchor="end" font-size="9.5" fill="#5b6675">70</text>
-      <text x="52" y="119.7" text-anchor="end" font-size="9.5" fill="#5b6675">80</text>
-      <text x="52" y="62.6" text-anchor="end" font-size="9.5" fill="#5b6675">90</text>
-      <text x="22" y="130" text-anchor="middle" font-size="10" font-weight="700" fill="#5b6675" transform="rotate(-90 22 130)">Tomatometer</text>
+      <text x="52" y="234" text-anchor="end" font-size="10.5" fill="#5b6675">60</text>
+      <text x="52" y="176.9" text-anchor="end" font-size="10.5" fill="#5b6675">70</text>
+      <text x="52" y="119.7" text-anchor="end" font-size="10.5" fill="#5b6675">80</text>
+      <text x="52" y="62.6" text-anchor="end" font-size="10.5" fill="#5b6675">90</text>
+      <text x="22" y="130" text-anchor="middle" font-size="11" font-weight="700" fill="#5b6675" transform="rotate(-90 22 130)">Tomatometer</text>
       <!-- x labels -->
-      <text x="95" y="248" text-anchor="middle" font-size="9.5" fill="#5b6675">Wed</text>
-      <text x="176" y="248" text-anchor="middle" font-size="9.5" fill="#5b6675">Thu</text>
-      <text x="257" y="248" text-anchor="middle" font-size="9.5" fill="#5b6675">Fri</text>
-      <text x="338" y="248" text-anchor="middle" font-size="9.5" fill="#5b6675">Sat</text>
-      <text x="419" y="248" text-anchor="middle" font-size="9.5" fill="#5b6675">Sun</text>
-      <text x="500" y="248" text-anchor="middle" font-size="9.5" fill="#5b6675">Mon</text>
-      <text x="95" y="264" text-anchor="middle" font-size="9" font-weight="700" fill="#3b5bdb">embargo lifts</text>
-      <text x="500" y="264" text-anchor="middle" font-size="9" font-weight="700" fill="#3b5bdb">settlement</text>
+      <text x="95" y="248" text-anchor="middle" font-size="10.5" fill="#5b6675">Wed</text>
+      <text x="176" y="248" text-anchor="middle" font-size="10.5" fill="#5b6675">Thu</text>
+      <text x="257" y="248" text-anchor="middle" font-size="10.5" fill="#5b6675">Fri</text>
+      <text x="338" y="248" text-anchor="middle" font-size="10.5" fill="#5b6675">Sat</text>
+      <text x="419" y="248" text-anchor="middle" font-size="10.5" fill="#5b6675">Sun</text>
+      <text x="500" y="248" text-anchor="middle" font-size="10.5" fill="#5b6675">Mon</text>
+      <text x="95" y="264" text-anchor="middle" font-size="10" font-weight="700" fill="#3b5bdb">embargo lifts</text>
+      <text x="500" y="264" text-anchor="middle" font-size="10" font-weight="700" fill="#3b5bdb">settlement</text>
       <line x1="95" y1="30" x2="95" y2="230" stroke="#c3d0f7" stroke-width="1" stroke-dasharray="3 3"/>
       <line x1="500" y1="30" x2="500" y2="230" stroke="#c3d0f7" stroke-width="1" stroke-dasharray="3 3"/>
 
       <!-- average drift (known, priced in) -->
       <line x1="95" y1="70" x2="500" y2="95.7" stroke="#868e96" stroke-width="1.8" stroke-dasharray="6 4"/>
-      <text x="506" y="99" font-size="9.5" font-weight="700" fill="#868e96">known average</text>
-      <text x="506" y="111" font-size="9" fill="#868e96">(already in the price)</text>
+      <text x="506" y="99" font-size="10.5" font-weight="700" fill="#868e96">known average</text>
+      <text x="506" y="111" font-size="10" fill="#868e96">(already in the price)</text>
 
       <!-- holds -->
       <path d="M95 70 C140 72,150 73,176 74 S230 76,257 77 S320 78.6,338 79 S460 81,500 81.4"
             fill="none" stroke="#2f9e44" stroke-width="2.4"/>
-      <text x="506" y="82" font-size="9.5" font-weight="700" fill="#2f9e44">holds: 86</text>
+      <text x="506" y="82" font-size="10.5" font-weight="700" fill="#2f9e44">holds: 86</text>
 
       <!-- collapses -->
       <path d="M95 70 C130 82,155 90,176 95 S230 120,257 130 S315 152,338 158 S455 180,500 184.3"
             fill="none" stroke="#e8590c" stroke-width="2.4"/>
-      <text x="506" y="188" font-size="9.5" font-weight="700" fill="#e8590c">collapses: 68</text>
+      <text x="506" y="188" font-size="10.5" font-weight="700" fill="#e8590c">collapses: 68</text>
 
       <!-- shared start -->
       <circle cx="95" cy="70" r="5" fill="#3b5bdb"/>
-      <text x="103" y="58" font-size="10" font-weight="700" fill="#3b5bdb">both open at 88</text>
+      <text x="103" y="58" font-size="11" font-weight="700" fill="#3b5bdb">both open at 88</text>
 
       <!-- the gap being modeled -->
       <line x1="482" y1="81.4" x2="482" y2="184.3" stroke="#7048e8" stroke-width="1.4" stroke-dasharray="3 3"/>
-      <text x="474" y="138" text-anchor="end" font-size="9.5" font-weight="700" fill="#7048e8">18 pts</text>
-      <text x="474" y="150" text-anchor="end" font-size="9" fill="#7048e8">of separation</text>
+      <text x="474" y="138" text-anchor="end" font-size="10.5" font-weight="700" fill="#7048e8">18 pts</text>
+      <text x="474" y="150" text-anchor="end" font-size="10" fill="#7048e8">of separation</text>
     </svg>
     <div class="cap"><strong>Illustrative, not measured</strong> (the measured comparison is further
       down). It shows two films that open at the same embargo number and settle 18 points apart. The dashed
@@ -315,7 +360,7 @@
     belief, then revise it as observations arrive. Four stages feed each other.
   </p>
 
-  <div class="fig">
+  <div class="fig pans">
     <svg viewBox="0 0 600 440" role="img" aria-label="Four-stage model chain: a cold-start prior from fundamentals, a review arrival model, a critic mix model, and a trajectory posterior, with reviews arriving as evidence and a conformal band on the output">
       <defs>
         <marker id="a1" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#3b5bdb"/></marker>
@@ -323,22 +368,22 @@
       </defs>
 
       <rect x="150" y="16" width="300" height="60" rx="10" fill="#eef2ff" stroke="#c3d0f7" stroke-width="1.4"/>
-      <text x="300" y="38" text-anchor="middle" font-size="12" font-weight="700" fill="#3b5bdb">1 &middot; Cold-start prior</text>
-      <text x="300" y="54" text-anchor="middle" font-size="9.5" fill="#5b6675">director, writer and studio track record, budget,</text>
-      <text x="300" y="68" text-anchor="middle" font-size="9.5" fill="#5b6675">runtime, language, franchise (before any review exists)</text>
+      <text x="300" y="38" text-anchor="middle" font-size="13" font-weight="700" fill="#3b5bdb">1 &middot; Cold-start prior</text>
+      <text x="300" y="54" text-anchor="middle" font-size="10.5" fill="#5b6675">director, writer and studio track record, budget,</text>
+      <text x="300" y="68" text-anchor="middle" font-size="10.5" fill="#5b6675">runtime, language, franchise (before any review exists)</text>
 
       <rect x="150" y="108" width="300" height="56" rx="10" fill="#eef2ff" stroke="#c3d0f7" stroke-width="1.4"/>
-      <text x="300" y="130" text-anchor="middle" font-size="12" font-weight="700" fill="#3b5bdb">2 &middot; How many reviews are still coming</text>
-      <text x="300" y="148" text-anchor="middle" font-size="9.5" fill="#5b6675">an arrival model: how much the number can still move</text>
+      <text x="300" y="130" text-anchor="middle" font-size="13" font-weight="700" fill="#3b5bdb">2 &middot; How many reviews are still coming</text>
+      <text x="300" y="148" text-anchor="middle" font-size="10.5" fill="#5b6675">an arrival model: how much the number can still move</text>
 
       <rect x="150" y="196" width="300" height="56" rx="10" fill="#eef2ff" stroke="#c3d0f7" stroke-width="1.4"/>
-      <text x="300" y="218" text-anchor="middle" font-size="12" font-weight="700" fill="#3b5bdb">3 &middot; Who has posted, who has not</text>
-      <text x="300" y="236" text-anchor="middle" font-size="9.5" fill="#5b6675">harshness of the critics seen so far, relative to their own history</text>
+      <text x="300" y="218" text-anchor="middle" font-size="13" font-weight="700" fill="#3b5bdb">3 &middot; Who has posted, who has not</text>
+      <text x="300" y="236" text-anchor="middle" font-size="10.5" fill="#5b6675">harshness of the critics seen so far, relative to their own history</text>
 
       <rect x="150" y="284" width="300" height="60" rx="10" fill="#e7ecff" stroke="#3b5bdb" stroke-width="2"/>
-      <text x="300" y="306" text-anchor="middle" font-size="12" font-weight="700" fill="#3b5bdb">4 &middot; Trajectory posterior</text>
-      <text x="300" y="322" text-anchor="middle" font-size="9.5" fill="#5b6675">the live forecast at this minute, blended toward observed</text>
-      <text x="300" y="336" text-anchor="middle" font-size="9.5" fill="#5b6675">reality as review count grows</text>
+      <text x="300" y="306" text-anchor="middle" font-size="13" font-weight="700" fill="#3b5bdb">4 &middot; Trajectory posterior</text>
+      <text x="300" y="322" text-anchor="middle" font-size="10.5" fill="#5b6675">the live forecast at this minute, blended toward observed</text>
+      <text x="300" y="336" text-anchor="middle" font-size="10.5" fill="#5b6675">reality as review count grows</text>
 
       <line x1="300" y1="76" x2="300" y2="106" stroke="#3b5bdb" stroke-width="1.8" marker-end="url(#a1)"/>
       <line x1="300" y1="164" x2="300" y2="194" stroke="#3b5bdb" stroke-width="1.8" marker-end="url(#a1)"/>
@@ -346,24 +391,24 @@
 
       <!-- evidence stream on the left -->
       <rect x="14" y="140" width="118" height="70" rx="10" fill="#fff6ec" stroke="#ffd8a8" stroke-width="1.4"/>
-      <text x="73" y="165" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e8590c">Reviews arrive</text>
-      <text x="73" y="182" text-anchor="middle" font-size="9" fill="#5b6675">timestamped,</text>
-      <text x="73" y="195" text-anchor="middle" font-size="9" fill="#5b6675">one at a time</text>
+      <text x="73" y="165" text-anchor="middle" font-size="11.5" font-weight="700" fill="#e8590c">Reviews arrive</text>
+      <text x="73" y="182" text-anchor="middle" font-size="10" fill="#5b6675">timestamped,</text>
+      <text x="73" y="195" text-anchor="middle" font-size="10" fill="#5b6675">one at a time</text>
       <path d="M132 175 H142 V225 H150" fill="none" stroke="#e8590c" stroke-width="1.6" marker-end="url(#a2)"/>
       <path d="M132 168 H142 V136 H150" fill="none" stroke="#e8590c" stroke-width="1.6" marker-end="url(#a2)"/>
       <path d="M132 182 H142 V313 H150" fill="none" stroke="#e8590c" stroke-width="1.6" marker-end="url(#a2)"/>
 
       <!-- uncertainty on the right -->
       <rect x="466" y="284" width="120" height="60" rx="10" fill="#f6f3ff" stroke="#e2d9fb" stroke-width="1.4"/>
-      <text x="526" y="306" text-anchor="middle" font-size="10.5" font-weight="700" fill="#7048e8">Conformal band</text>
-      <text x="526" y="322" text-anchor="middle" font-size="9" fill="#5b6675">sized from held-out</text>
-      <text x="526" y="334" text-anchor="middle" font-size="9" fill="#5b6675">residuals, not a formula</text>
+      <text x="526" y="306" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7048e8">Conformal band</text>
+      <text x="526" y="322" text-anchor="middle" font-size="10" fill="#5b6675">sized from held-out</text>
+      <text x="526" y="334" text-anchor="middle" font-size="10" fill="#5b6675">residuals, not a formula</text>
       <line x1="450" y1="314" x2="464" y2="314" stroke="#7048e8" stroke-width="1.6"/>
 
       <!-- yardstick, deliberately outside -->
       <rect x="150" y="376" width="300" height="50" rx="10" fill="#fff" stroke="#adb5bd" stroke-width="1.4" stroke-dasharray="5 4"/>
-      <text x="300" y="397" text-anchor="middle" font-size="11" font-weight="700" fill="#495057">Market price: evaluation only</text>
-      <text x="300" y="414" text-anchor="middle" font-size="9.5" fill="#868e96">never a feature, never a label, no arrow into the model</text>
+      <text x="300" y="397" text-anchor="middle" font-size="12" font-weight="700" fill="#495057">Market price: evaluation only</text>
+      <text x="300" y="414" text-anchor="middle" font-size="10.5" fill="#868e96">never a feature, never a label, no arrow into the model</text>
       <line x1="300" y1="344" x2="300" y2="374" stroke="#adb5bd" stroke-width="1.4" stroke-dasharray="4 3"/>
     </svg>
     <div class="cap">The chain as a filter. Stage 1 is the belief before evidence; stages 2 and 3 say how
@@ -402,14 +447,17 @@
       (tracking, screenings, buzz) that no public feature I found represents.</p>
   </div>
   <p style="font-size:.93em;color:var(--muted)">
-    Three caveats I keep attached to that paragraph, because it is the one people quote. My model sits at
-    about R&sup2; 0.20 against its own 0.28 feature ceiling, so a sliver of the gap is my modeling and
-    not the data. And the result proves my <em>current</em> features cannot close it, not that no
-    obtainable public feature could; I tested embargo lead, franchise and cast power since, and none of
-    them closed it, which makes the private-information reading more likely without proving it. That
-    analysis also predates the 140-market replay used in the chart below and has not been re-run
-    against it, so treat the direction as solid and the second decimal as not.
+    Three caveats I keep attached to that paragraph, because it is the one people quote.
   </p>
+  <ol class="caveats">
+    <li>My model sits at about R&sup2; 0.20 against its own 0.28 feature ceiling, so a sliver of the gap
+      is my modeling and not the data.</li>
+    <li>It proves my <em>current</em> features cannot close it, not that no obtainable public feature
+      could. I tested embargo lead, franchise and cast power since, and none of them closed it, which
+      makes the private-information reading more likely without proving it.</li>
+    <li>The analysis predates the 140-market replay used in the chart below and has not been re-run
+      against it, so treat the direction as solid and the second decimal as not.</li>
+  </ol>
 
   <p>
     That result is why the framing of this project is &ldquo;explain,&rdquo; not &ldquo;beat.&rdquo; Here
@@ -424,41 +472,41 @@
     kept separately and is not what is plotted here.
   </p>
 
-  <div class="fig">
+  <div class="fig pans">
     <svg viewBox="0 0 600 310" role="img" aria-label="Measured mean absolute error against horizon for the model, the Kalshi price and a running-average baseline, all on the same films in each column. The market is more accurate far out; close in the model and the baseline coincide.">
       <line x1="92.0" y1="214.8" x2="486.0" y2="214.8" stroke="#eef1f6" stroke-width="1"/>
-      <text x="84" y="218.3" text-anchor="end" font-size="9.5" fill="#5b6675">0.1</text>
+      <text x="84" y="218.3" text-anchor="end" font-size="10.5" fill="#5b6675">0.1</text>
       <line x1="92.0" y1="174.7" x2="486.0" y2="174.7" stroke="#eef1f6" stroke-width="1"/>
-      <text x="84" y="178.2" text-anchor="end" font-size="9.5" fill="#5b6675">0.3</text>
+      <text x="84" y="178.2" text-anchor="end" font-size="10.5" fill="#5b6675">0.3</text>
       <line x1="92.0" y1="130.7" x2="486.0" y2="130.7" stroke="#eef1f6" stroke-width="1"/>
-      <text x="84" y="134.2" text-anchor="end" font-size="9.5" fill="#5b6675">1</text>
+      <text x="84" y="134.2" text-anchor="end" font-size="10.5" fill="#5b6675">1</text>
       <line x1="92.0" y1="90.6" x2="486.0" y2="90.6" stroke="#eef1f6" stroke-width="1"/>
-      <text x="84" y="94.1" text-anchor="end" font-size="9.5" fill="#5b6675">3</text>
+      <text x="84" y="94.1" text-anchor="end" font-size="10.5" fill="#5b6675">3</text>
       <line x1="92.0" y1="46.7" x2="486.0" y2="46.7" stroke="#eef1f6" stroke-width="1"/>
-      <text x="84" y="50.2" text-anchor="end" font-size="9.5" fill="#5b6675">10</text>
+      <text x="84" y="50.2" text-anchor="end" font-size="10.5" fill="#5b6675">10</text>
       <line x1="92.0" y1="40.0" x2="92.0" y2="244.0" stroke="#c7cedb" stroke-width="1.2"/>
       <line x1="92.0" y1="244.0" x2="486.0" y2="244.0" stroke="#c7cedb" stroke-width="1.2"/>
-      <text x="22" y="140" text-anchor="middle" font-size="10" font-weight="700" fill="#5b6675" transform="rotate(-90 22 140)">Mean absolute error (RT points)</text>
-      <text x="289" y="296" text-anchor="middle" font-size="10" font-weight="700" fill="#5b6675">Hours before the Monday cutoff</text>
-      <text x="118.0" y="260" text-anchor="middle" font-size="9.5" fill="#5b6675">144</text>
-      <text x="118.0" y="272" text-anchor="middle" font-size="8" fill="#9aa4b2">n=67</text>
-      <text x="179.3" y="260" text-anchor="middle" font-size="9.5" fill="#5b6675">96</text>
-      <text x="179.3" y="272" text-anchor="middle" font-size="8" fill="#9aa4b2">n=122</text>
-      <text x="240.7" y="260" text-anchor="middle" font-size="9.5" fill="#5b6675">48</text>
-      <text x="240.7" y="272" text-anchor="middle" font-size="8" fill="#9aa4b2">n=140</text>
-      <text x="302.0" y="260" text-anchor="middle" font-size="9.5" fill="#5b6675">24</text>
-      <text x="302.0" y="272" text-anchor="middle" font-size="8" fill="#9aa4b2">n=140</text>
-      <text x="363.3" y="260" text-anchor="middle" font-size="9.5" fill="#5b6675">12</text>
-      <text x="363.3" y="272" text-anchor="middle" font-size="8" fill="#9aa4b2">n=140</text>
-      <text x="424.7" y="260" text-anchor="middle" font-size="9.5" fill="#5b6675">2</text>
-      <text x="424.7" y="272" text-anchor="middle" font-size="8" fill="#9aa4b2">n=140</text>
-      <text x="486.0" y="260" text-anchor="middle" font-size="9.5" fill="#5b6675">0</text>
-      <text x="486.0" y="272" text-anchor="middle" font-size="8" fill="#9aa4b2">n=140</text>
+      <text x="22" y="140" text-anchor="middle" font-size="11" font-weight="700" fill="#5b6675" transform="rotate(-90 22 140)">Mean absolute error (RT points)</text>
+      <text x="289" y="296" text-anchor="middle" font-size="11" font-weight="700" fill="#5b6675">Hours before the Monday cutoff</text>
+      <text x="118.0" y="260" text-anchor="middle" font-size="10.5" fill="#5b6675">144</text>
+      <text x="118.0" y="272" text-anchor="middle" font-size="9" fill="#9aa4b2">n=67</text>
+      <text x="179.3" y="260" text-anchor="middle" font-size="10.5" fill="#5b6675">96</text>
+      <text x="179.3" y="272" text-anchor="middle" font-size="9" fill="#9aa4b2">n=122</text>
+      <text x="240.7" y="260" text-anchor="middle" font-size="10.5" fill="#5b6675">48</text>
+      <text x="240.7" y="272" text-anchor="middle" font-size="9" fill="#9aa4b2">n=140</text>
+      <text x="302.0" y="260" text-anchor="middle" font-size="10.5" fill="#5b6675">24</text>
+      <text x="302.0" y="272" text-anchor="middle" font-size="9" fill="#9aa4b2">n=140</text>
+      <text x="363.3" y="260" text-anchor="middle" font-size="10.5" fill="#5b6675">12</text>
+      <text x="363.3" y="272" text-anchor="middle" font-size="9" fill="#9aa4b2">n=140</text>
+      <text x="424.7" y="260" text-anchor="middle" font-size="10.5" fill="#5b6675">2</text>
+      <text x="424.7" y="272" text-anchor="middle" font-size="9" fill="#9aa4b2">n=140</text>
+      <text x="486.0" y="260" text-anchor="middle" font-size="10.5" fill="#5b6675">0</text>
+      <text x="486.0" y="272" text-anchor="middle" font-size="9" fill="#9aa4b2">n=140</text>
       <rect x="271.3" y="40.0" width="214.7" height="204.0" fill="#fff4e6" opacity="0.75"/>
-      <text x="378.7" y="53" text-anchor="middle" font-size="8.5" font-weight="700" fill="#e8590c">model and baseline are the same number here,</text>
-      <text x="378.7" y="64" text-anchor="middle" font-size="8.5" font-weight="700" fill="#e8590c">by construction, so the gap to the market is not a result</text>
+      <text x="378.7" y="53" text-anchor="middle" font-size="9.5" font-weight="700" fill="#e8590c">model and baseline are the same number here,</text>
+      <text x="378.7" y="64" text-anchor="middle" font-size="9.5" font-weight="700" fill="#e8590c">by construction, so the gap to the market is not a result</text>
       <line x1="210.0" y1="40.0" x2="210.0" y2="244.0" stroke="#adb5bd" stroke-width="1.2" stroke-dasharray="5 4"/>
-      <text x="203.0" y="236" text-anchor="end" font-size="8.5" font-weight="700" fill="#868e96">market more accurate</text>
+      <text x="203.0" y="236" text-anchor="end" font-size="9.5" font-weight="700" fill="#868e96">market more accurate</text>
       <polyline points="118.0,44.6 179.3,66.9 240.7,117.7 302.0,142.2 363.3,156.8 424.7,179.9 486.0,233.5" fill="none" stroke="#e8590c" stroke-width="3.4" opacity="0.95"/>
       <polyline points="118.0,72.3 179.3,91.2 240.7,110.5 302.0,126.6 363.3,133.8 424.7,134.6 486.0,136.7" fill="none" stroke="#495057" stroke-width="2.4"/>
       <polyline points="118.0,64.4 179.3,82.3 240.7,120.6 302.0,142.2 363.3,156.8 424.7,179.9 486.0,233.5" fill="none" stroke="#3b5bdb" stroke-width="2.4" stroke-dasharray="7 4"/>
@@ -483,11 +531,11 @@
       <circle cx="486.0" cy="233.5" r="3.2" fill="#e8590c"/>
       <circle cx="486.0" cy="136.7" r="3" fill="#495057"/>
       <circle cx="486.0" cy="233.5" r="3" fill="#3b5bdb"/>
-      <text x="494" y="139.7" font-size="9.5" font-weight="700" fill="#495057">market</text>
-      <text x="494" y="229.5" font-size="9.5" font-weight="700" fill="#3b5bdb">model</text>
-      <text x="494" y="241.5" font-size="9.5" font-weight="700" fill="#e8590c">baseline</text>
-      <text x="92" y="16" font-size="9.5" fill="#5b6675"><tspan font-weight="700">At 144 hours</tspan> (n=67): market <tspan font-weight="700" fill="#495057">5.0</tspan>, model <tspan font-weight="700" fill="#3b5bdb">6.2</tspan>, baseline <tspan font-weight="700" fill="#e8590c">10.6</tspan></text>
-      <text x="92" y="30" font-size="9.5" fill="#5b6675"><tspan font-weight="700" fill="#2f9e44">model beats the baseline by 4.4</tspan>, <tspan font-weight="700" fill="#c92a2a">the market beats the model by 1.2</tspan></text>
+      <text x="494" y="139.7" font-size="10.5" font-weight="700" fill="#495057">market</text>
+      <text x="494" y="229.5" font-size="10.5" font-weight="700" fill="#3b5bdb">model</text>
+      <text x="494" y="241.5" font-size="10.5" font-weight="700" fill="#e8590c">baseline</text>
+      <text x="92" y="16" font-size="10.5" fill="#5b6675"><tspan font-weight="700">At 144 hours</tspan> (n=67): market <tspan font-weight="700" fill="#495057">5.0</tspan>, model <tspan font-weight="700" fill="#3b5bdb">6.2</tspan>, baseline <tspan font-weight="700" fill="#e8590c">10.6</tspan></text>
+      <text x="92" y="30" font-size="10.5" fill="#5b6675"><tspan font-weight="700" fill="#2f9e44">model beats the baseline by 4.4</tspan>, <tspan font-weight="700" fill="#c92a2a">the market beats the model by 1.2</tspan></text>
     </svg>
     <div class="cap">Measured, not illustrative, and leakage-gated. Mean absolute error in Tomatometer
       points, log scale, against Kalshi&rsquo;s own published implied score and against a baseline that
@@ -499,32 +547,73 @@
   </div>
 
   <p>
-    That chart is the most useful thing I learned, and it is not flattering. <span class="hl">The model
-    beats the do-nothing baseline by a clear margin only at the horizons where the market beats the
-    model:</span> 6.2 against the baseline&rsquo;s 10.6 at six days, and 3.8 against 5.8 at four, paired
-    gaps of 4.4 [1.9, 7.3] and 2.0 [0.8, 3.5] points. From 24 hours in, where the model most clearly
-    beats the market, it is indistinguishable from simply averaging the reviews already posted. There is
-    a mechanical reason: the served number is a blend of the model and the running average, weighted by
-    the share of reviews still outstanding, so as that share goes to zero the forecast <em>becomes</em>
-    the running average by construction. Reporting the late-horizon win over the market without this
-    baseline would let an identity pose as a modeling result. So the baseline is scored as its own arm
-    in every table, and the numbers I would actually defend are the far ones, against the baseline, not
-    the near ones against the market.
+    That chart is the most useful thing I learned, and it is not flattering.
+  </p>
+
+  <p class="point">
+    The model beats the do-nothing baseline by a clear margin only at the horizons where the market
+    beats the model.
+  </p>
+
+  <p>
+    Six days out it is 6.2 against the baseline&rsquo;s 10.6, and four days out 3.8 against 5.8: paired
+    gaps of 4.4 [1.9, 7.3] and 2.0 [0.8, 3.5] points. But from 24 hours in, where the model most
+    clearly beats the market, it is indistinguishable from simply averaging the reviews already posted.
+  </p>
+
+  <p>
+    There is a mechanical reason. The served number is a blend of the model and the running average,
+    weighted by the share of reviews still outstanding, so as that share goes to zero the forecast
+    <em>becomes</em> the running average by construction. Reporting the late-horizon win over the
+    market without this baseline would let an identity pose as a modeling result. So the baseline is
+    scored as its own arm in every table, and the numbers I would defend are the far ones, against the
+    baseline, not the near ones against the market.
   </p>
   <p>
     Before the first review the running-average baseline does not exist, so that horizon needs a
     different floor: predicting the same number for every film. Across the settled markets the
-    Tomatometer averages 67.4 with a standard deviation of 21.8, and always saying 67.4 earns a mean
-    absolute error of <strong>18.0</strong> (17.5 if you say the median instead, and both are computed
-    in-sample, which favors the constant). The model&rsquo;s cold start is <strong>11.2</strong>. The
-    market is <strong>8.2</strong>.
+    Tomatometer averages 67.4, and always saying 67.4 is the floor to beat.
   </p>
-  <p>
-    That is the shape of the cold-start result. Pedigree carries real information: knowing who
-    directed it, who wrote it and who released it cuts the error against a constant by about a third.
-    The market cuts it by about half. <span class="hl">So this is a gap between two informative
-    forecasters, not a case of useless features,</span> which is what makes the private-information
-    reading interesting rather than trivial.
+
+  <div class="fig">
+    <svg class="only-wide" viewBox="0 0 600 176" role="img" aria-label="Cold-start mean absolute error before any review exists: a constant prediction scores 18.0, this model 11.2, and the Kalshi market 8.2, so the model sits between the two.">
+      <text x="16" y="20" font-size="13" font-weight="700" fill="#2a3340">Before any review exists</text>
+      <text x="16" y="37" font-size="12" fill="#868e96">mean absolute error in Tomatometer points, lower is better</text>
+      <text x="222" y="76" text-anchor="end" font-size="12.5" fill="#2a3340">Always predict the average film</text>
+      <rect x="236" y="60" width="300.0" height="24" rx="3" fill="#b6bfcc"/>
+      <text x="546.0" y="77" font-size="13.5" font-weight="800" fill="#b6bfcc">18.0</text>
+      <text x="222" y="112" text-anchor="end" font-size="12.5" fill="#2a3340">This model, pedigree only</text>
+      <rect x="236" y="96" width="186.7" height="24" rx="3" fill="#3b5bdb"/>
+      <text x="432.7" y="113" font-size="13.5" font-weight="800" fill="#3b5bdb">11.2</text>
+      <text x="222" y="148" text-anchor="end" font-size="12.5" fill="#2a3340">The Kalshi market</text>
+      <rect x="236" y="132" width="136.7" height="24" rx="3" fill="#343a40"/>
+      <text x="382.7" y="149" font-size="13.5" font-weight="800" fill="#343a40">8.2</text>
+      <line x1="236" y1="52" x2="236" y2="164" stroke="#7d8798" stroke-width="1.4"/>
+    </svg>
+<svg class="only-phone" viewBox="0 0 272 200" role="img" aria-label="Cold-start mean absolute error before any review exists: a constant prediction scores 18.0, this model 11.2, and the Kalshi market 8.2.">
+      <text x="8" y="15" font-size="12.5" font-weight="700" fill="#2a3340">Before any review exists</text>
+      <text x="8" y="30" font-size="10.5" fill="#868e96">mean absolute error, lower is better</text>
+      <text x="8" y="52" font-size="11" fill="#2a3340">Always predict the average film</text>
+      <text x="264" y="52" text-anchor="end" font-size="13" font-weight="800" fill="#b6bfcc">18.0</text>
+      <rect x="8" y="58" width="256" height="13" rx="3" fill="#eef1f6"/>
+      <rect x="8" y="58" width="256.0" height="13" rx="3" fill="#b6bfcc"/>
+      <text x="8" y="100" font-size="11" fill="#2a3340">This model, pedigree only</text>
+      <text x="264" y="100" text-anchor="end" font-size="13" font-weight="800" fill="#3b5bdb">11.2</text>
+      <rect x="8" y="106" width="256" height="13" rx="3" fill="#eef1f6"/>
+      <rect x="8" y="106" width="159.3" height="13" rx="3" fill="#3b5bdb"/>
+      <text x="8" y="148" font-size="11" fill="#2a3340">The Kalshi market</text>
+      <text x="264" y="148" text-anchor="end" font-size="13" font-weight="800" fill="#343a40">8.2</text>
+      <rect x="8" y="154" width="256" height="13" rx="3" fill="#eef1f6"/>
+      <rect x="8" y="154" width="116.6" height="13" rx="3" fill="#343a40"/>
+    </svg>
+    <div class="cap">Pedigree alone cuts the constant&rsquo;s error by about a third; the market cuts
+      it by about half. The distance between the blue bar and the dark one is the private information
+      the model cannot see. The constant is computed in-sample, which favors it, and saying the median
+      instead of the mean scores 17.5.</div>
+  </div>
+
+  <p class="point">
+    So the cold start is a gap between two informative forecasters, not a case of useless features.
   </p>
 
   <div class="decisions">
@@ -599,12 +688,19 @@
     One more correction worth recording, because it was mine. An earlier version of my own write-up
     claimed the model &ldquo;ties the market at every horizon.&rdquo; It does not, and the sentence was
     sloppy in a specific way: it glued a <em>clock-time</em> claim to a <em>review-count</em> condition.
+  </p>
+  <p>
     Unconditioned, the far horizons are clear losses. Conditioned on at least one review existing, two
-    horizons are statistically indistinguishable, but with 65 films and an interval three and a
-    half points wide, &ldquo;indistinguishable&rdquo; cannot separate <em>equal</em> from <em>the market
-    is better</em>, and the point estimate leans against me in both. <span class="hl">An underpowered
-    null is not a tie,</span> and the comparison script now prints both slices side by side so the claim
-    cannot be quoted loosely again.
+    horizons are statistically indistinguishable, but with 65 films and an interval three and a half
+    points wide, &ldquo;indistinguishable&rdquo; cannot separate <em>equal</em> from <em>the market is
+    better</em>, and the point estimate leans against me in both.
+  </p>
+  <p class="point">
+    An underpowered null is not a tie.
+  </p>
+  <p>
+    The comparison script now prints both slices side by side, so the claim cannot be quoted loosely
+    again.
   </p>
   <p>
     One stage is designed but deliberately not built, and saying so is part of the record:
@@ -625,7 +721,7 @@
     forecast said at each minute all have to happen without me.
   </p>
 
-  <div class="fig">
+  <div class="fig pans">
     <svg viewBox="0 0 600 412" role="img" aria-label="Architecture: a single-writer loop on a VM writes to Cloud SQL each minute, a scale-to-zero API reads from it, a model registry serves the champion model, and a weekly retraining job promotes only through four gates">
       <defs>
         <marker id="b1" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#3b5bdb"/></marker>
@@ -635,76 +731,76 @@
 
       <!-- external sources -->
       <rect x="16" y="20" width="140" height="44" rx="9" fill="#fff6ec" stroke="#ffd8a8" stroke-width="1.3"/>
-      <text x="86" y="40" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e8590c">Market feed</text>
-      <text x="86" y="55" text-anchor="middle" font-size="9" fill="#5b6675">polled every minute</text>
+      <text x="86" y="40" text-anchor="middle" font-size="11.5" font-weight="700" fill="#e8590c">Market feed</text>
+      <text x="86" y="55" text-anchor="middle" font-size="10" fill="#5b6675">polled every minute</text>
 
       <rect x="16" y="80" width="140" height="44" rx="9" fill="#fff6ec" stroke="#ffd8a8" stroke-width="1.3"/>
-      <text x="86" y="100" text-anchor="middle" font-size="10.5" font-weight="700" fill="#e8590c">Review site</text>
-      <text x="86" y="115" text-anchor="middle" font-size="9" fill="#5b6675">cheap count check first</text>
+      <text x="86" y="100" text-anchor="middle" font-size="11.5" font-weight="700" fill="#e8590c">Review site</text>
+      <text x="86" y="115" text-anchor="middle" font-size="10" fill="#5b6675">cheap count check first</text>
 
       <!-- the loop -->
       <rect x="196" y="20" width="208" height="104" rx="11" fill="#eef2ff" stroke="#3b5bdb" stroke-width="1.8"/>
-      <text x="300" y="42" text-anchor="middle" font-size="11.5" font-weight="700" fill="#3b5bdb">Live loop (always-on VM)</text>
-      <text x="300" y="60" text-anchor="middle" font-size="9.5" fill="#5b6675">the <tspan font-weight="700">only</tspan> process that writes</text>
-      <text x="300" y="76" text-anchor="middle" font-size="9.5" fill="#5b6675">one forecast row per open contract, per tick</text>
-      <text x="300" y="92" text-anchor="middle" font-size="9.5" fill="#5b6675">full re-read only when the site has more</text>
-      <text x="300" y="108" text-anchor="middle" font-size="9.5" fill="#5b6675">reviews than the database does</text>
+      <text x="300" y="42" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3b5bdb">Live loop (always-on VM)</text>
+      <text x="300" y="60" text-anchor="middle" font-size="10.5" fill="#5b6675">the <tspan font-weight="700">only</tspan> process that writes</text>
+      <text x="300" y="76" text-anchor="middle" font-size="10.5" fill="#5b6675">one forecast row per open contract, per tick</text>
+      <text x="300" y="92" text-anchor="middle" font-size="10.5" fill="#5b6675">full re-read only when the site has more</text>
+      <text x="300" y="108" text-anchor="middle" font-size="10.5" fill="#5b6675">reviews than the database does</text>
 
       <line x1="156" y1="42" x2="194" y2="52" stroke="#e8590c" stroke-width="1.5" marker-end="url(#b1)"/>
       <line x1="156" y1="102" x2="194" y2="92" stroke="#e8590c" stroke-width="1.5" marker-end="url(#b1)"/>
 
       <!-- timers -->
       <rect x="424" y="20" width="160" height="104" rx="9" fill="#fbfcfe" stroke="#e3e8ef" stroke-width="1.3"/>
-      <text x="504" y="40" text-anchor="middle" font-size="10.5" font-weight="700" fill="#495057">Scheduled jobs</text>
-      <text x="504" y="57" text-anchor="middle" font-size="9" fill="#5b6675">onboard new films hourly</text>
-      <text x="504" y="71" text-anchor="middle" font-size="9" fill="#5b6675">watch for embargo dates</text>
-      <text x="504" y="85" text-anchor="middle" font-size="9" fill="#5b6675">model monitors, cost ledger</text>
-      <text x="504" y="99" text-anchor="middle" font-size="9" fill="#5b6675">Monday settlement report</text>
-      <text x="504" y="115" text-anchor="middle" font-size="8.5" font-style="italic" fill="#868e96">a health endpoint watches all of them</text>
+      <text x="504" y="40" text-anchor="middle" font-size="11.5" font-weight="700" fill="#495057">Scheduled jobs</text>
+      <text x="504" y="57" text-anchor="middle" font-size="10" fill="#5b6675">onboard new films hourly</text>
+      <text x="504" y="71" text-anchor="middle" font-size="10" fill="#5b6675">watch for embargo dates</text>
+      <text x="504" y="85" text-anchor="middle" font-size="10" fill="#5b6675">model monitors, cost ledger</text>
+      <text x="504" y="99" text-anchor="middle" font-size="10" fill="#5b6675">Monday settlement report</text>
+      <text x="504" y="115" text-anchor="middle" font-size="9.5" font-style="italic" fill="#868e96">a health endpoint watches all of them</text>
 
       <!-- database -->
       <rect x="196" y="168" width="208" height="58" rx="11" fill="#e7ecff" stroke="#3b5bdb" stroke-width="2"/>
-      <text x="300" y="192" text-anchor="middle" font-size="11.5" font-weight="700" fill="#3b5bdb">Managed Postgres</text>
-      <text x="300" y="209" text-anchor="middle" font-size="9.5" fill="#5b6675">forecast history, markets, reviews, costs</text>
+      <text x="300" y="192" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3b5bdb">Managed Postgres</text>
+      <text x="300" y="209" text-anchor="middle" font-size="10.5" fill="#5b6675">forecast history, markets, reviews, costs</text>
       <line x1="300" y1="124" x2="300" y2="166" stroke="#3b5bdb" stroke-width="1.8" marker-end="url(#b1)"/>
       <path d="M504 124 V147 H310 V166" fill="none" stroke="#adb5bd" stroke-width="1.4" marker-end="url(#b1)"/>
 
       <!-- api -->
       <rect x="16" y="168" width="150" height="58" rx="9" fill="#fbfcfe" stroke="#e3e8ef" stroke-width="1.3"/>
-      <text x="91" y="188" text-anchor="middle" font-size="10.5" font-weight="700" fill="#495057">Read API</text>
-      <text x="91" y="204" text-anchor="middle" font-size="9" fill="#5b6675">scales to zero</text>
-      <text x="91" y="217" text-anchor="middle" font-size="9" fill="#5b6675">forecasts, explanations</text>
+      <text x="91" y="188" text-anchor="middle" font-size="11.5" font-weight="700" fill="#495057">Read API</text>
+      <text x="91" y="204" text-anchor="middle" font-size="10" fill="#5b6675">scales to zero</text>
+      <text x="91" y="217" text-anchor="middle" font-size="10" fill="#5b6675">forecasts, explanations</text>
       <line x1="194" y1="197" x2="170" y2="197" stroke="#3b5bdb" stroke-width="1.5" marker-end="url(#b1)"/>
 
       <!-- registry -->
       <rect x="424" y="168" width="160" height="58" rx="9" fill="#f6f3ff" stroke="#e2d9fb" stroke-width="1.4"/>
-      <text x="504" y="186" text-anchor="middle" font-size="10.5" font-weight="700" fill="#7048e8">Model registry</text>
-      <text x="504" y="202" text-anchor="middle" font-size="9" fill="#5b6675">one movable pointer to the champion;</text>
-      <text x="504" y="215" text-anchor="middle" font-size="9" fill="#5b6675">the loop and the API load what it names</text>
+      <text x="504" y="186" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7048e8">Model registry</text>
+      <text x="504" y="202" text-anchor="middle" font-size="10" fill="#5b6675">one movable pointer to the champion;</text>
+      <text x="504" y="215" text-anchor="middle" font-size="10" fill="#5b6675">the loop and the API load what it names</text>
       <line x1="422" y1="197" x2="406" y2="197" stroke="#c0b6e8" stroke-width="1.3" stroke-dasharray="4 3"/>
 
       <!-- retrain -->
       <rect x="150" y="266" width="300" height="52" rx="10" fill="#f7fdf8" stroke="#b2f2bb" stroke-width="1.5"/>
-      <text x="300" y="288" text-anchor="middle" font-size="11" font-weight="700" fill="#2f9e44">Weekly retrain job: Mondays, after settlement</text>
-      <text x="300" y="305" text-anchor="middle" font-size="9.5" fill="#5b6675">newly settled contracts become training rows</text>
+      <text x="300" y="288" text-anchor="middle" font-size="12" font-weight="700" fill="#2f9e44">Weekly retrain job: Mondays, after settlement</text>
+      <text x="300" y="305" text-anchor="middle" font-size="10.5" fill="#5b6675">newly settled contracts become training rows</text>
       <path d="M300 226 V264" fill="none" stroke="#2f9e44" stroke-width="1.6" marker-end="url(#b3)"/>
 
       <!-- gates -->
       <rect x="40" y="340" width="120" height="44" rx="8" fill="#fff" stroke="#b2f2bb" stroke-width="1.3"/>
-      <text x="100" y="358" text-anchor="middle" font-size="9" font-weight="700" fill="#2f9e44">1 &middot; it loads</text>
-      <text x="100" y="373" text-anchor="middle" font-size="8.5" fill="#5b6675">and actually serves</text>
+      <text x="100" y="358" text-anchor="middle" font-size="10" font-weight="700" fill="#2f9e44">1 &middot; it loads</text>
+      <text x="100" y="373" text-anchor="middle" font-size="9.5" fill="#5b6675">and actually serves</text>
 
       <rect x="172" y="340" width="120" height="44" rx="8" fill="#fff" stroke="#b2f2bb" stroke-width="1.3"/>
-      <text x="232" y="358" text-anchor="middle" font-size="9" font-weight="700" fill="#2f9e44">2 &middot; no data lost</text>
-      <text x="232" y="373" text-anchor="middle" font-size="8.5" fill="#5b6675">superset of champion&rsquo;s</text>
+      <text x="232" y="358" text-anchor="middle" font-size="10" font-weight="700" fill="#2f9e44">2 &middot; no data lost</text>
+      <text x="232" y="373" text-anchor="middle" font-size="9.5" fill="#5b6675">superset of champion&rsquo;s</text>
 
       <rect x="304" y="340" width="120" height="44" rx="8" fill="#fff" stroke="#b2f2bb" stroke-width="1.3"/>
-      <text x="364" y="358" text-anchor="middle" font-size="9" font-weight="700" fill="#2f9e44">3 &middot; held-out slice</text>
-      <text x="364" y="373" text-anchor="middle" font-size="8.5" fill="#5b6675">not worse than last week</text>
+      <text x="364" y="358" text-anchor="middle" font-size="10" font-weight="700" fill="#2f9e44">3 &middot; held-out slice</text>
+      <text x="364" y="373" text-anchor="middle" font-size="9.5" fill="#5b6675">not worse than last week</text>
 
       <rect x="436" y="340" width="124" height="44" rx="8" fill="#fff" stroke="#b2f2bb" stroke-width="1.3"/>
-      <text x="498" y="358" text-anchor="middle" font-size="9" font-weight="700" fill="#2f9e44">4 &middot; no wild swing</text>
-      <text x="498" y="373" text-anchor="middle" font-size="8.5" fill="#5b6675">within historical movement</text>
+      <text x="498" y="358" text-anchor="middle" font-size="10" font-weight="700" fill="#2f9e44">4 &middot; no wild swing</text>
+      <text x="498" y="373" text-anchor="middle" font-size="9.5" fill="#5b6675">within historical movement</text>
 
       <path d="M300 318 V330" fill="none" stroke="#2f9e44" stroke-width="1.6"/>
       <path d="M100 330 H500" fill="none" stroke="#2f9e44" stroke-width="1.4"/>
@@ -712,7 +808,7 @@
       <line x1="232" y1="330" x2="232" y2="338" stroke="#2f9e44" stroke-width="1.4" marker-end="url(#b3)"/>
       <line x1="364" y1="330" x2="364" y2="338" stroke="#2f9e44" stroke-width="1.4" marker-end="url(#b3)"/>
       <line x1="498" y1="330" x2="498" y2="338" stroke="#2f9e44" stroke-width="1.4" marker-end="url(#b3)"/>
-      <text x="300" y="398" text-anchor="middle" font-size="9.5" font-style="italic" fill="#2f9e44">all four gates must pass, or the pointer does not move</text>
+      <text x="300" y="398" text-anchor="middle" font-size="10.5" font-style="italic" fill="#2f9e44">all four gates must pass, or the pointer does not move</text>
     </svg>
     <div class="cap">Two design constraints shape this picture. Exactly one process writes, so a minute-by-minute
       forecast log cannot be corrupted by two workers racing. And the pointer to the live model only moves when
@@ -723,22 +819,34 @@
   <p>
     The model gets better as contracts settle and become labeled data, so retraining weekly is obviously
     right. The risk is equally obvious: a job that trains and promotes on its own can promote something
-    worse and nobody finds out until the forecasts look strange. Each gate answers a specific failure I have already had: the artifact loads but cannot serve; the new training set silently drops
-    contracts the current champion learned from; the candidate looks better only because it is being
-    scored on data it trained on; the candidate is fine on average but has moved its opening forecasts
-    further in one week than any week in over two years of replayed history. The last one is the
-    interesting gate, because it catches a model that is <em>defensible on the test set</em> and still
-    behaving unlike itself.
+    worse, and nobody finds out until the forecasts look strange. Each gate answers a specific failure I
+    have already had.
+  </p>
+  <ol class="caveats">
+    <li>The artifact loads but cannot actually serve.</li>
+    <li>The new training set silently drops contracts the current champion learned from.</li>
+    <li>The candidate looks better only because it is being scored on data it trained on.</li>
+    <li>The candidate is fine on average but has moved its opening forecasts further in one week than
+      any week in over two years of replayed history.</li>
+  </ol>
+  <p>
+    The last one is the interesting gate, because it catches a model that is <em>defensible on the test
+    set</em> and still behaving unlike itself.
   </p>
 
   <h3>Shipping without breaking the record</h3>
   <p>
-    Deploys have to earn their way out. A push must have a green build for that exact commit before the deploy
-    script will proceed; a dirty working tree or an unpushed commit stops it; images are built once and
-    released by content hash so the thing tested is the thing that ships; the new revision takes no traffic
-    until its heavy paths are warm and a contract check passes; and a failed post-deploy check rolls both
-    services back on its own. That rollback has fired for real on a live deploy, which is the only way to
-    know it works.
+    Deploys have to earn their way out. Five things have to be true before a change reaches anyone:
+  </p>
+  <ol class="caveats">
+    <li>the commit has a green build, that exact commit, or the deploy script refuses to run;</li>
+    <li>the working tree is clean and the commit is pushed;</li>
+    <li>images are built once and released by content hash, so the thing tested is the thing that ships;</li>
+    <li>the new revision takes no traffic until its heavy paths are warm and a contract check passes;</li>
+    <li>a failed post-deploy check rolls both services back on its own.</li>
+  </ol>
+  <p>
+    That rollback has fired for real on a live deploy, which is the only way to know it works.
   </p>
   <div class="callout">
     <p style="margin-bottom:0"><strong>What it costs.</strong> The read API scales to zero, which keeps
