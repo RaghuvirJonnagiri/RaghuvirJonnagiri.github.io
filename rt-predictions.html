@@ -85,7 +85,6 @@
   .decisions{align-items:stretch}
   .decision{border:1px solid var(--line);border-radius:10px;padding:18px;background:#fbfcfe;
     display:flex;flex-direction:column}
-  .decision .why{margin-top:auto}
   .decision h4{font-size:.95em;font-weight:700;color:var(--ink);margin-bottom:6px}
   .decision .why{font-size:.85em;color:var(--muted);margin-top:8px;padding-top:8px;
     border-top:1px solid var(--line)}
@@ -169,66 +168,61 @@
 <!-- ============ WHY ============ -->
 <section id="why">
   <div class="kicker">The Question</div>
-  <h2>A price exists for a number nobody has computed yet</h2>
+  <h2>People are betting on a number that does not exist yet</h2>
   <div class="callout">
-    <p style="margin-bottom:0"><strong>The short answer is no, and that is the finding.</strong> Before
-      the embargo lifts the market beats me decisively. Afterwards we converge, but so does simply
-      averaging the reviews already posted, which turns out to be most of what the convergence is. Both
-      are measured below.</p>
+    <p style="margin-bottom:0"><strong>The short answer is no.</strong> Before the first reviews come
+      out, the market beats my model badly. After the reviews start, we end up in the same place, but so
+      does just averaging the reviews already published. Both of those are measured further down.</p>
   </div>
   <p class="lead">
-    A movie&rsquo;s Tomatometer is the share of critics whose review is counted as positive. It first
-    appears when the review embargo lifts, a few days before release, and it keeps moving as more critics
-    file. There is a market where people trade contracts on where that percentage will sit at a fixed
-    Monday cutoff, and that market carries a live price all week.
+    A movie&rsquo;s Tomatometer score is simply the percentage of critics who liked it. The first score
+    shows up a few days before release, when critics are allowed to publish, and it keeps changing as
+    more of them post. On Kalshi, a betting site, people trade on where that percentage will land by a
+    set deadline on Monday. There is a live price all week.
   </p>
   <p>
-    So a number is being priced before it is knowable. The price comes from somewhere I cannot see:
-    industry tracking, test screenings, private conversations, gut feel. The question I wanted to answer
-    is whether <strong>public information alone</strong> can land where that opaque price lands.
+    So people are putting money on a number nobody can look up yet. They know things I cannot see: how
+    test screenings went, what the industry is hearing, plain gut feel. I wanted to know something
+    simple. <strong>Using only public information, can I get to the same number they do?</strong>
   </p>
   <p>
-    That question has two halves, and they are very different problems.
+    That turns out to be two different problems.
   </p>
   <p>
-    Before the embargo lifts there is no review to read, so the only evidence is pedigree: who directed
-    it, who wrote it, which studio released it, what it cost, how long it is. That half is a cold-start
-    prediction.
+    <strong>Before any review exists,</strong> all I have is the film&rsquo;s background: the director,
+    the writer, the studio, the budget, the runtime. I have to guess the score from scratch.
   </p>
   <p>
-    After the embargo lifts, reviews start landing one at a time, each timestamped, and the forecast has
-    to <strong>absorb them as they arrive</strong> and keep projecting forward to the Monday deadline,
-    when critics who have not yet filed will have filed. That half is sequential, and it is the larger
-    part of the work: <span class="hl">the number you are predicting keeps moving while you predict
-    it.</span>
+    <strong>Once reviews start appearing,</strong> they arrive one at a time, each with a timestamp. Now
+    I have to keep updating my guess as each one lands, and still predict where it will finish on Monday,
+    once the critics who have not posted yet have posted. This is the harder half, because
+    <span class="hl">the number keeps moving while you are trying to predict it.</span>
   </p>
   <div class="callout">
-    <p style="margin-bottom:0"><strong>The thesis.</strong> If a transparent model built only from public
-      information arrives at the market&rsquo;s number, that convergence <em>explains</em> the price:
-      it says the market is reading things anyone could read, not secrets. Where the two disagree, the
-      disagreement itself is the finding. The goal was never a trading edge.</p>
+    <p style="margin-bottom:0"><strong>Why bother.</strong> If a model anyone can inspect ends up at the
+      same number as the market, that tells you the market is mostly reading public information, not
+      secrets. If the two disagree, the disagreement is the interesting part. I was never trying to make
+      money on it.</p>
   </div>
   <p>
-    That framing dictated one hard rule, enforced everywhere in the code: <span class="hl">the market
-    price is never a feature and never a label.</span> It appears only at evaluation time, as a yardstick
-    I am scored against. A model that can see the price would learn to copy it and explain nothing.
+    That gave me one rule I never broke: <span class="hl">the model never sees the market price.</span>
+    Not while training, not as a hint, nothing. The price only shows up at the end, when I check my
+    answer against it. A model that could see the price would just copy it, and copying proves nothing.
   </p>
 
-  <h3>What exactly is the benchmark</h3>
+  <h3>Where the market&rsquo;s number comes from</h3>
   <p>
-    The venue is <strong>Kalshi</strong>, and it matters how their number is obtained, because the whole
-    comparison rests on it. Kalshi does not trade the Tomatometer directly: each contract is a yes/no bet
-    on a line, &ldquo;will this film finish above 70?&rdquo;
+    This matters, because the whole comparison rests on it. Kalshi does not let you bet on the exact
+    score. Each bet is yes or no on a line: will this film finish above 70?
   </p>
 
   <p>
-    But Kalshi also publishes its own implied score over time, a field called
-    <code>numerical_forecast</code>, which is the curve their app shows traders. That published series is
-    the benchmark, pulled at minute resolution over each contract&rsquo;s life through a read-only,
-    signed API. <span class="hl">So the market&rsquo;s number is theirs, not my reconstruction of
-    theirs,</span> which removes the obvious objection that I built the yardstick I am measured against.
-    The separate line-by-line contracts are scored too, as calibrated probabilities, but they cover fewer
-    films and are reported on their own denominator rather than blended in.
+    But Kalshi also publishes its own running estimate of the final score, and that is the curve their
+    app shows traders. That is the number I compare against, taken every minute of each contract&rsquo;s
+    life through a read-only connection. <span class="hl">So the market&rsquo;s number is their number,
+    not my guess at what they think,</span> which kills the obvious complaint that I made up my own
+    scoreboard. I score the yes/no bets too, but fewer films have them, so I report those separately
+    instead of mixing them in.
   </p>
 </section>
 
@@ -237,22 +231,22 @@
   <div class="kicker">What Actually Moves</div>
   <h2>Scores drift down, and everyone already knows it</h2>
   <p>
-    Because every review carries a second-level timestamp, the score can be reconstructed at any moment
-    in history: the score at time <em>T</em> is the fresh rate among reviews posted by <em>T</em>. Doing
-    that for a thousand films gives a thousand score curves, and they lean the same way. The
-    critics who post first are self-selected enthusiasts, often from outlets courting early access. As
-    the pool widens, harsher voices arrive and dilute the number.
+    Every review comes with a timestamp, down to the second. That means I can rebuild what the score was
+    at any past moment: count the reviews posted by then, and work out the percentage that were positive.
+    Do that for a thousand films and you get a thousand score histories, and they nearly all lean the
+    same way. The critics who post first tend to be the keen ones, often from outlets that get early
+    access. As more critics pile in, the harsher ones drag the number down.
   </p>
   <div class="stats">
-    <div class="stat"><div class="n">&minus;4.5 pts</div><div class="l">mean drift, embargo &rarr; settlement</div></div>
-    <div class="stat"><div class="n">~3 : 1</div><div class="l">falls outnumber rises</div></div>
-    <div class="stat"><div class="n">&minus;4.9 pts</div><div class="l">the same effect <em>inside</em> one film: its late reviews vs its early ones</div></div>
-    <div class="stat"><div class="n">&sigma; &asymp; 10</div><div class="l">per-film spread that remains</div></div>
+    <div class="stat"><div class="n">&minus;4.5 pts</div><div class="l">the average fall, first score to final score</div></div>
+    <div class="stat"><div class="n">~3 : 1</div><div class="l">films that fall, versus films that rise</div></div>
+    <div class="stat"><div class="n">&minus;4.9 pts</div><div class="l">the same effect <em>within</em> a single film: its late reviews versus its early ones</div></div>
+    <div class="stat"><div class="n">&plusmn; 10</div><div class="l">how much films still vary around that average</div></div>
   </div>
   <p>
-    Here is the trap. The average drift is common knowledge, so it is already in the price. Forecasting
-    &ldquo;it will fall about four points&rdquo; adds nothing. The only thing worth anything is
-    <strong>discrimination</strong>: separating the 88 that holds at 86 from the 88 that collapses to 68.
+    Here is the catch. Everyone knows scores fall, so that is already built into the price. Predicting
+    &ldquo;it will drop about four points&rdquo; is worth nothing. The only thing worth anything is
+    telling the films apart: <strong>spotting which 88 holds at 86, and which 88 falls to 68.</strong>
   </p>
 
   <div class="fig pans">
@@ -311,11 +305,12 @@
       scored on rank correlation, not on average error.</div>
   </div>
   <p>
-    That metric choice matters more than it sounds. Average error rewards a model for reproducing the
-    priced-in average, which is why it hid a real signal for weeks. Scoring on discrimination instead
-    <strong>revived a feature I had already retired</strong>: a measure of how harsh the critics who have
-    already posted are, relative to their own history, lifts drift-ranking correlation from 0.34 to 0.54
-    at the earliest horizon.
+    How you score a model matters more than it sounds. If you grade on average error, a model gets
+    rewarded for predicting the average fall that everyone already expects, which is why one real signal
+    stayed hidden for weeks. Once I graded on <em>which films fall furthest</em> instead,
+    <strong>a feature I had already thrown out came back</strong>. If the critics who have posted so far
+    are harsher than they normally are, the film tends to keep falling. That lifted the ranking score
+    from 0.34 to 0.54 at the earliest point, where 1.0 would be perfect.
   </p>
 </section>
 
@@ -324,10 +319,10 @@
   <div class="kicker">The Data</div>
   <h2>None of this existed as a dataset</h2>
   <p>
-    There is no download for any of this. Every asset below was collected, deduplicated and
-    date-guarded by hand, with resumable idempotent collectors: network work on worker threads, all
-    writes funneled through a single writer, every write an upsert, so an interrupted run costs minutes
-    rather than a restart.
+    You cannot download any of this. I collected all of it myself, removed duplicates, and made sure
+    nothing from the future leaked into the past. The collectors can be stopped and restarted without
+    losing or double-counting anything, so an interrupted run costs a few minutes instead of starting
+    over.
   </p>
   <table>
     <thead><tr><th>Asset</th><th>Scale</th><th>What it is for</th></tr></thead>
@@ -341,12 +336,13 @@
     </tbody>
   </table>
   <p>
-    Two collection lessons were worth more than the rows they produced. The critic directory&rsquo;s
-    silent 100-per-letter cap is the kind of defect that never raises an error and quietly poisons every
-    downstream statistic. And the market history looked capped at 17 usable settled contracts until I
-    found the venue had reorganized its naming convention partway through; scanning properly recovered
-    around 178. <span class="hl">A number that looks small is sometimes a collection bug, not a
-    fact,</span> and in this case the difference decided whether the evaluation had any power at all.
+    Two things I learned while collecting were worth more than the data itself. The critic directory
+    quietly stops at 100 names per letter of the alphabet. It does not warn you; it just hands back a
+    short list, and every statistic built on it would have been wrong. And I thought there were only 17
+    finished contracts to test against, until I found that Kalshi had changed how it named them partway
+    through. Searching properly turned up about 178. <span class="hl">A number that looks small is
+    sometimes a bug, not a fact,</span> and here it was the difference between having enough data to
+    prove anything and not.
   </p>
 </section>
 
@@ -355,9 +351,9 @@
   <div class="kicker">The Model</div>
   <h2>A belief that starts from pedigree and is revised by every review</h2>
   <p>
-    The forecast has to be valid at every moment, from before a single review exists to the minute
-    before settlement, and it has to get sharper as evidence lands. That shape is a filter: hold a
-    belief, then revise it as observations arrive. Four stages feed each other.
+    The forecast has to work at any moment, from before a single review exists right up to the deadline,
+    and it should get sharper as more reviews come in. So it works like a running estimate: start with a
+    best guess, then update it every time something new arrives. Four pieces feed into each other.
   </p>
 
   <div class="fig pans">
@@ -417,59 +413,62 @@
   </div>
 
   <p>
-    The strongest single ingredient in the cold start turned out to be the <strong>studio&rsquo;s track
-    record</strong>, shrunk toward the global mean so a studio with three films does not out-vote one with
-    three hundred. Some coefficient signs read wrong until you think about who gets reviewed: English
-    language is a mild <em>negative</em>, because the foreign films that reach American critics are
-    already filtered down to the prestige ones, and a bigger budget is a negative too, because
-    tentpoles review worse than mid-budget films. Video-game adaptations sit near 50, biopics near 75.
+    The single most useful clue before any review exists is <strong>the studio&rsquo;s track record</strong>.
+    A studio with three films to its name gets less weight than one with three hundred, so a small sample
+    cannot swing things.
+  </p>
+  <p>
+    A few results looked backwards until I thought about who gets reviewed at all. Films in English score
+    slightly <em>worse</em>, because the foreign films that reach American critics are already the
+    prestige ones. Bigger budgets also score worse, because blockbusters review worse than mid-budget
+    films. Video game adaptations land near 50; biographical films near 75.
   </p>
 </section>
 
 <!-- ============ FINDINGS ============ -->
 <section id="findings">
   <div class="kicker">What Held Up, What I Killed</div>
-  <h2>The honest pile</h2>
+  <h2>What worked, and what I threw away</h2>
   <p class="lead">
-    Most of what I built did not survive. That is the part of the project I would most want to be judged
-    on, so it is on the page: each kill below rests on a measurement, and several of them saved weeks of
-    collection I would otherwise have paid for.
+    Most of what I built did not work. I would rather be judged on that than on the parts that did, so it
+    is all here. Nothing below was dropped on a hunch. Each one was measured first, and a few of those
+    measurements saved me weeks of pointless data collection.
   </p>
 
   <div class="callout warn">
-    <p style="margin-bottom:0"><strong>The biggest negative result, stated first.</strong> Before the
-      embargo lifts, in the cold-start phase where forecasting would be most valuable, the market
-      beats this model decisively, and not by a little. I did not leave that as an impression; I measured
-      the ceiling. The information in my public features explains 28% of the variance in the final score.
-      The market explains 72%. The correlation between the market&rsquo;s price and my own error is
-      <strong>+0.59</strong>: it is right precisely where I am wrong. Adding my features on top of the
-      market price moves its fit by about one point of R&sup2;. The market holds pre-release information
-      (tracking, screenings, buzz) that no public feature I found represents.</p>
+    <p style="margin-bottom:0"><strong>The worst result, up front.</strong> Before any reviews exist,
+      which is exactly when a forecast would be most useful, the market beats my model badly. I did not
+      just leave it at that, I measured how badly. Everything I can know publicly accounts for 28% of
+      what decides the final score. The market accounts for 72%. And when I check where I go wrong, the
+      market is <strong>most confident exactly where I am most wrong</strong>. Bolting my features onto
+      the market price barely improves it. The market knows things before release, from screenings and
+      industry chatter, that nothing public tells me.</p>
   </div>
   <p style="font-size:.93em;color:var(--muted)">
-    Three caveats I keep attached to that paragraph, because it is the one people quote.
+    Three things I always say alongside that, because it is the paragraph people quote.
   </p>
   <ol class="caveats">
-    <li>My model sits at about R&sup2; 0.20 against its own 0.28 feature ceiling, so a sliver of the gap
-      is my modeling and not the data.</li>
-    <li>It proves my <em>current</em> features cannot close it, not that no obtainable public feature
-      could. I tested embargo lead, franchise and cast power since, and none of them closed it, which
-      makes the private-information reading more likely without proving it.</li>
-    <li>The analysis predates the 140-market replay used in the chart below and has not been re-run
-      against it, so treat the direction as solid and the second decimal as not.</li>
+    <li>My model does not quite reach even the 28% its own data allows, so a small part of the gap is my
+      modeling rather than the data.</li>
+    <li>This shows <em>my</em> features cannot close the gap. It does not prove no public feature could.
+      I have since tried three more and none of them closed it, which makes the private-information
+      explanation likelier but not proven.</li>
+    <li>This comparison is older than the 140-film test below and I have not re-run it, so trust the
+      direction and not the exact figures.</li>
   </ol>
 
   <p>
-    That result is why the framing of this project is &ldquo;explain,&rdquo; not &ldquo;beat.&rdquo; Here
-    is the whole comparison, on <strong>140 settled Kalshi markets</strong>, with the one arm that makes
-    it honest: a baseline that ignores the model entirely and just averages the reviews posted so far.
+    That is why this project is about explaining the market, not beating it. Here is the full
+    comparison across <strong>140 finished Kalshi contracts</strong>, including the one thing that keeps
+    it honest: a dumb baseline that ignores my model completely and just averages the reviews published
+    so far.
   </p>
   <p>
-    On the split protocol, because it is the first thing worth asking: these rows come from a per-vintage
-    replay: to score a given film at a given minute, the model is refit on only the films that had
-    already settled by that minute. The alternative, replaying history with today&rsquo;s champion, leaks
-    later settlements backwards into earlier forecasts, and the version of this table that does that is
-    kept separately and is not what is plotted here.
+    One thing worth checking before you trust any of it: could the model be cheating by knowing the
+    future? To score a film at a given minute, I retrain it using only films that had already finished by
+    that minute. The lazy alternative is to replay history using today&rsquo;s model, which has seen
+    results that had not happened yet. I keep that version separately, and it is not what is plotted
+    here.
   </p>
 
   <div class="fig pans">
@@ -562,12 +561,12 @@
   </p>
 
   <p>
-    There is a mechanical reason. The served number is a blend of the model and the running average,
-    weighted by the share of reviews still outstanding, so as that share goes to zero the forecast
-    <em>becomes</em> the running average by construction. Reporting the late-horizon win over the
-    market without this baseline would let an identity pose as a modeling result. So the baseline is
-    scored as its own arm in every table, and the numbers I would defend are the far ones, against the
-    baseline, not the near ones against the market.
+    There is a plain reason for that. My forecast is a mix of the model&rsquo;s guess and the average of
+    the reviews so far, and the fewer reviews are still to come, the more weight the average gets. By
+    the deadline there is nothing left to come, so my forecast <em>is</em> the average. Claiming that as
+    a win would be claiming credit for arithmetic. So the dumb baseline is scored in every table I
+    produce, and the results I would actually stand behind are the early ones against the baseline, not
+    the late ones against the market.
   </p>
   <p>
     Before the first review the running-average baseline does not exist, so that horizon needs a
@@ -618,69 +617,74 @@
 
   <div class="decisions">
     <div class="decision kept">
-      <h4>&#10003; Held: the drift is real and directional</h4>
+      <h4>&#10003; Worked: the drift is real, and it has a direction</h4>
       <p>The score falls about 4.5 points on average, with falls outnumbering rises roughly three to one,
          and the effect survives controlling for opening-day sample noise.</p>
       <div class="why">But only the conditional mean is predictable. Most of the per-film spread is
         small-sample mean reversion, which is irreducible.</div>
     </div>
     <div class="decision kept">
-      <h4>&#10003; Held: discrimination as the metric</h4>
-      <p>Switching the drift stage from average error to rank correlation recovered a signal I had already
-         retired: critic harshness lifts ranking correlation 0.34 &rarr; 0.54 at the earliest horizon.</p>
-      <div class="why">Average error pays a model for reproducing the average everyone already prices.
-        The metric was hiding the finding.</div>
+      <h4>&#10003; Worked: grading on the right thing</h4>
+      <p>I stopped grading on average error and started grading on whether the model ranks films
+         correctly, worst faller to best holder. A signal I had already discarded came straight back:
+         0.34 to 0.54, where 1.0 would be perfect.</p>
+      <div class="why">Average error pays you for predicting the average drop everyone already expects.
+        The way I was measuring was hiding the result.</div>
     </div>
     <div class="decision kept">
-      <h4>&#10003; Held: the arrival model</h4>
-      <p>Predicting how many reviews are still to come cut error by about a third against the obvious
-         baseline, and the live version predicts the increment rather than the total.</p>
-      <div class="why">It is not a headline number, but it sets how far the score can still move, which
-        every interval downstream depends on.</div>
+      <h4>&#10003; Worked: predicting how many reviews are left</h4>
+      <p>Guessing how many more reviews are still coming cut the error by about a third compared to the
+         obvious approach.</p>
+      <div class="why">Not exciting on its own, but it decides how far the score can still move, and
+        every confidence range I publish depends on it.</div>
     </div>
     <div class="decision killed">
-      <h4>&#10007; Broke: the interval is honest on average, dishonest where it is narrowest</h4>
-      <p>The served band is nominal 90%. On a 156-film holdout it covers 89% per film (95% interval
-         0.86 to 0.92, so consistent with nominal) at a median width of 16 points. Cut by horizon it
-         falls apart exactly where the band is tightest: 70% coverage in the last 2 to 6 hours, 42% in
-         the last 2, 28% at the cutoff.</p>
-      <div class="why">This is the textbook failure of split conformal, measured rather than assumed:
-        the method guarantees coverage on <em>average</em>, and a user lives in one cell, never in the
-        average. In fairness to the band, at the cutoff it is 0.16 points wide and the median miss is
-        0.26 points, so it is a band collapsing to zero rather than a wild forecast. Still a
-        misstatement of confidence, and still unfixed.</div>
+      <h4>&#10007; Broke: my &ldquo;90% sure&rdquo; range is only right on average</h4>
+      <p>Every forecast comes with a range that is supposed to contain the true answer 90% of the time.
+         Across 156 films it does: 89%. But if you look only at the final hours, it fails badly. In the
+         last few hours it is right 70% of the time, in the last two hours 42%, and at the deadline
+         itself 28%.</p>
+      <div class="why">This is the known weakness of the method, and I measured it rather than assumed
+         it away. It promises to be right 90% of the time <em>overall</em>, but nobody reads an overall
+         average, they read one film at one moment. In its defence, by the deadline the range has
+         narrowed to a fraction of a point and the typical miss is about a quarter of a point, so it is
+         a range shrinking to nothing rather than a wild forecast. It still overstates confidence, and I
+         have not fixed it.</div>
     </div>
     <div class="decision killed">
-      <h4>&#10007; Killed: the per-critic model</h4>
-      <p>The plan was to predict each outstanding critic&rsquo;s vote. It rests on harsh critics posting
-         late, and the correlation between a critic&rsquo;s harshness and when they typically post
-         is <strong>&minus;0.03</strong>. Outstanding critics are a lean-neutral draw.</p>
-      <div class="why">The drift is real but it lives per event, not per person: on a given film, whoever
-        reacts badly posts later. A fixed per-critic lean is mathematically blind to that. Killed on a
-        structural reason rather than a disappointing score.</div>
+      <h4>&#10007; Killed: predicting each critic individually</h4>
+      <p>The idea was to guess how each critic who has not posted yet will vote. It only works if harsh
+         critics tend to post late. They do not: the link between how harsh a critic is and how late
+         they usually post is <strong>essentially zero</strong>. The critics still to come are a coin
+         flip.</p>
+      <div class="why">Scores really do fall late, but it is not because harsh people are late in
+         general. On any given film, whoever happens to dislike <em>that</em> film posts later. Knowing a
+         critic&rsquo;s usual temperament cannot capture that. I killed it because the idea was broken,
+         not because the score was disappointing.</div>
     </div>
     <div class="decision killed">
-      <h4>&#10007; Killed: star power, both ways</h4>
-      <p>Cast fame correlates <em>negatively</em> with score (&minus;0.24; A-listers anchor broad
-         tentpoles). Cast quality correlates +0.25 and is real on its own, but adds +0.004 R&sup2; over
-         fundamentals: it is collinear with director, writer and studio priors.</p>
-      <div class="why">This null was computed from films already in hand, with coverage on 978 of 1,001
-        titles, and it vetoed a roughly 20,000-film collection run. A well-powered null is a budget
-        decision.</div>
+      <h4>&#10007; Killed: star power, in both forms</h4>
+      <p>Famous casts score slightly <em>worse</em>, because big stars headline big crowd-pleasers that
+         critics tend to mark down. Casts with a good track record do score better on their own, but once
+         I already know the director, writer and studio, the cast adds almost nothing new.</p>
+      <div class="why">I worked this out from films I already had, covering 978 of 1,001 titles, before
+         collecting anything. It talked me out of scraping roughly 20,000 more films. A convincing
+         negative result is worth as much as a positive one here, because it saves the work.</div>
     </div>
     <div class="decision killed">
-      <h4>&#10007; Killed: the contrarian-critic axis</h4>
-      <p>I intended a second axis for critics who systematically disagree with consensus. Measuring first
-         showed they barely exist: median agreement +0.50, with under 1% of critics below zero.</p>
-      <div class="why">The feature pointed at an empty region of the data. Measuring before building cost
-        an afternoon instead of a week.</div>
+      <h4>&#10007; Killed: the contrarian critic</h4>
+      <p>I wanted to track critics who reliably disagree with everyone else. I measured first, and they
+         barely exist: fewer than 1% of critics lean against the consensus at all.</p>
+      <div class="why">The idea was pointing at an empty part of the data. Checking first cost an
+        afternoon; building it first would have cost a week.</div>
     </div>
     <div class="decision killed">
-      <h4>&#10007; Demoted: embargo lead time</h4>
-      <p>How early a studio lets critics publish looked predictive, but globally it is redundant:
-         it is a symptom of budget, studio and director, all already encoded.</p>
-      <div class="why">Except on films with no pedigree at all, debut directors and obscure studios, where
-         it adds +0.118 R&sup2;. Kept strictly as a fallback for the cold-start case it actually helps.</div>
+      <h4>&#10007; Demoted: how early critics are allowed to publish</h4>
+      <p>Studios that are confident let critics publish early, so this looked promising. In general it
+         is redundant: it mostly just reflects the budget, studio and director, which I already know.</p>
+      <div class="why">With one exception. For films where I know nothing about the people involved,
+         first-time directors and unknown studios, it genuinely helps, so I kept it only for that
+         case.</div>
     </div>
   </div>
 
@@ -715,10 +719,10 @@
   <div class="kicker">In Production</div>
   <h2>It runs whether or not I am watching</h2>
   <p>
-    A forecast that only exists in a notebook cannot be wrong in public, so the whole thing runs
-    unattended on Google Cloud. Contracts are live for a few days at a time, which means onboarding a
-    new film, polling the market, noticing new reviews, refreshing an explanation and recording what the
-    forecast said at each minute all have to happen without me.
+    A forecast sitting in a notebook on my laptop can never be publicly wrong, which makes it easy to
+    fool yourself. So the whole thing runs on Google Cloud without me. Contracts only last a few days, so
+    picking up new films, checking the market, spotting new reviews, and recording what the forecast said
+    at every minute all have to happen on their own.
   </p>
 
   <div class="fig pans">
@@ -817,10 +821,10 @@
 
   <h3>Why retraining needed gates rather than a cron line</h3>
   <p>
-    The model gets better as contracts settle and become labeled data, so retraining weekly is obviously
-    right. The risk is equally obvious: a job that trains and promotes on its own can promote something
-    worse, and nobody finds out until the forecasts look strange. Each gate answers a specific failure I
-    have already had.
+    Every time a contract finishes, I learn the real answer for one more film, so retraining every week
+    is obviously worth doing. The risk is just as obvious: a job that retrains and swaps in the new model
+    by itself can quietly swap in a worse one, and nobody notices until the forecasts start looking odd.
+    Each check below exists because that failure has already happened to me in that exact way.
   </p>
   <ol class="caveats">
     <li>The artifact loads but cannot actually serve.</li>
@@ -849,11 +853,12 @@
     That rollback has fired for real on a live deploy, which is the only way to know it works.
   </p>
   <div class="callout">
-    <p style="margin-bottom:0"><strong>What it costs.</strong> The read API scales to zero, which keeps
-      idle spend near nothing but means a first request after a quiet period waits roughly 35 to 40 seconds
-      for a cold start. That is a real wait, and it is a deliberate trade: this is a portfolio system, and
-      I would rather pay it than keep a warm instance running around the clock. The writing loop, which
-      genuinely cannot miss a minute, runs on an always-on instance instead.</p>
+    <p style="margin-bottom:0"><strong>What it costs.</strong> The part that answers questions shuts
+      itself off when nobody is using it, so it costs almost nothing to idle. The price is that the first
+      request after a quiet spell waits about 35 to 40 seconds while it starts up. That is a real wait
+      and I chose it: this is a portfolio project, not a business, so I would rather wait than pay to
+      keep it running all night. The part that records forecasts cannot afford to miss a minute, so that
+      one stays on permanently.</p>
   </div>
 </section>
 
