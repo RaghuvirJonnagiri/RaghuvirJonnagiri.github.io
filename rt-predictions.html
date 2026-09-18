@@ -142,17 +142,11 @@
 <header>
   <div class="wrap">
     <h1>Can a Transparent Model Explain a Prediction Market?</h1>
-    <p>A prediction market prices where a movie&rsquo;s Rotten&nbsp;Tomatoes score will settle on Monday.
-       I forecast the same number every minute of that week, and never let the model see the market.</p>
-    <p class="answer">
-       <strong>The short answer is no, and that is the finding.</strong> Before the embargo lifts the
-       market beats me decisively. Afterwards we converge, but so does simply averaging the reviews
-       already posted, which turns out to be most of what the convergence is.</p>
-    <p style="font-size:.88em;opacity:.8;margin-top:14px">A solo project: I collected the data, built
-       the models, and keep the pipeline running unattended on Google&nbsp;Cloud.</p>
+    <p>Forecasting where a movie&rsquo;s Rotten&nbsp;Tomatoes score will settle, against a market the
+       model is never allowed to see.</p>
     <div class="tags">
+      <span class="tag">Solo project</span>
       <span class="tag">Sequential forecasting</span>
-      <span class="tag">Self-collected data</span>
       <span class="tag">Deployed on Google Cloud</span>
     </div>
   </div>
@@ -176,6 +170,12 @@
 <section id="why">
   <div class="kicker">The Question</div>
   <h2>A price exists for a number nobody has computed yet</h2>
+  <div class="callout">
+    <p style="margin-bottom:0"><strong>The short answer is no, and that is the finding.</strong> Before
+      the embargo lifts the market beats me decisively. Afterwards we converge, but so does simply
+      averaging the reviews already posted, which turns out to be most of what the convergence is. Both
+      are measured below.</p>
+  </div>
   <p class="lead">
     A movie&rsquo;s Tomatometer is the share of critics whose review is counted as positive. It first
     appears when the review embargo lifts, a few days before release, and it keeps moving as more critics
